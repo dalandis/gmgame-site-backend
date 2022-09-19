@@ -22,17 +22,45 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Описание 
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Бэкенд сайта gmgame
 
-## Installation
+## Установка
 
 ```bash
-$ npm install
+$ npm i
 ```
 
-## Running the app
+Установить mysql
+
+Создать базу и пользователя
+```bash
+create database dbname character set utf8;
+create user 'dbuser'@'localhost' identified by 'userpassword';
+grant all privileges on dbname.* to 'dbuser'@'localhost';
+```
+
+## Конфигурация
+
+.env
+```bash
+MYSQL_HOST=localhost
+MYSQL_DB_NAME=gmgame_test
+MYSQL_DB_USER=gmgame_test
+MYSQL_DB_PASSWORD=111111111
+```
+
+.env.discord
+```bash
+SECRET_SESSION='kljb;wknf;lkmdlcmwiofhwuihrpfhfonds;lkcsdmsdljds'
+AUTH_CLIENT_ID=1234567891
+AUTH_CLIENT_SECRET='jbfkwbfwhlfwbj;kfnweklfnwfklwfkwjfe'
+AUTH_CALLBACK='http://127.0.0.1:3001/api/callback'
+URL_WEBHOOK_FOR_REG='https://discord.com/api/webhooks/7823698724748274624/jblkjebkgjnrg;ernjkerlvblerjhvjejkrververvr'
+```
+
+## Запуск приложения
 
 ```bash
 # development
@@ -44,29 +72,6 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
