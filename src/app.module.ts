@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuthController } from './auth/auth.controller';
 import { User } from './users/users.model';
 import { UsersModule } from './users/users.module';
+import { TerritoriesModule } from './territories/territories.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { UsersModule } from './users/users.module';
         }),
         AuthModule,
         UsersModule,
+        TerritoriesModule,
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',
@@ -24,7 +26,8 @@ import { UsersModule } from './users/users.module';
                 password: process.env.MYSQL_DB_PASSWORD,
                 database: process.env.MYSQL_DB_NAME,
                 models: [User],
-                autoLoadModels: true
+                autoLoadModels: true,
+                logging: console.log
             })
         }),
     ],
