@@ -8,6 +8,7 @@ import { AuthController } from './auth/auth.controller';
 import { User } from './users/users.model';
 import { UsersModule } from './users/users.module';
 import { TerritoriesModule } from './territories/territories.module';
+import { MarkersModule } from './markers/markers.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { TerritoriesModule } from './territories/territories.module';
         AuthModule,
         UsersModule,
         TerritoriesModule,
+        MarkersModule,
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',

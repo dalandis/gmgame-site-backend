@@ -63,7 +63,6 @@ URL_WEBHOOK_FOR_REG='https://discord.com/api/webhooks/7823698724748274624/jblkje
 ## Запуск приложения
 
 ```bash
-npx sequelize-cli db:migrate --url 'mysql://gmgame_test:123@127.0.0.1/gmgame_test'
 # development
 $ npm run start
 
@@ -72,6 +71,13 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+```
+
+## Миграции
+
+```bash
+npx sequelize-cli migration:create --name NAME
+npx sequelize-cli db:migrate --url 'mysql://dbname:password@127.0.0.1/dbuser'
 ```
 
 ## License

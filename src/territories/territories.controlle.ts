@@ -30,24 +30,24 @@ export class TerritoriesController {
     }
 
     @UseGuards(AuthenticatedGuard)
-    @Post('/edit_markers')
-    async editMarkers(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
+    @Post('/edit_terr')
+    async editTerr(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
         const message = await this.territoriesService.editTerritories(body, req.user.id);
         console.log(message);
         res.send(JSON.stringify(message));
     }
 
     @UseGuards(AuthenticatedGuard)
-    @Post('add_markers')
-    async addMarkers(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
+    @Post('add_terr')
+    async addTerr(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
         const message = await this.territoriesService.addTerritories(body, req.user.id);
         console.log(message);
         res.send(JSON.stringify(message));
     }
 
     @UseGuards(AuthenticatedGuard)
-    @Post('delete_markers')
-    async deleteMarkers(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
+    @Post('delete_mterr')
+    async deleteTerr(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
         const message = await this.territoriesService.deleteTerritories(body, req.user.id);
         console.log(message);
         res.send(JSON.stringify(message));
