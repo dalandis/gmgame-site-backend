@@ -2,10 +2,14 @@ import { Controller, Get, UseGuards, Request, Response, Param, Post, Body, HttpS
 import { MarkersService } from './markers.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { markersDto } from '../validator/save_edit.markers';
+import { UtilsService } from '../Utils/utils.service';
 
 @Controller('/api')
 export class MarkersController {
-    constructor(private readonly markersService: MarkersService) {}
+    constructor(
+        private readonly markersService: MarkersService,
+        private readonly utilsService: UtilsService
+    ) {}
 
     @UseGuards(AuthenticatedGuard)
     @Get('/get_markers')
@@ -25,7 +29,7 @@ export class MarkersController {
 
         res.send({
             marker: marker,
-            world_name: await this.markersService.getWorldName(marker.server || '')
+            world_name: await this.utilsService.getWorldName(marker.server || '')
         });
     }
 

@@ -27,17 +27,6 @@ export class MarkersService {
         });
     }
 
-    async getWorldName(world: string): Promise<string> {
-        switch(world) {
-            case 'gmgame':
-                return 'GMGameWorld - overworld';
-            case 'farm':
-                return 'FarmWorld - overworld';
-            default:
-                return 'GMGameWorld - overworld';
-        }
-    }
-
     async editMarker(params: markersDto, user: string): Promise<Record<string,string>> {
         try {
             await this.markersModel.update(

@@ -27,17 +27,6 @@ export class TerritoriesService {
         });
     }
 
-    async getWorldName(world: string): Promise<string> {
-        switch(world) {
-            case 'gmgame':
-                return 'GMGameWorld - overworld';
-            case 'farm':
-                return 'FarmWorld - overworld';
-            default:
-                return 'GMGameWorld - overworld';
-        }
-    }
-
     async editTerritories(params: territoriesDto, user: string): Promise<Record<string,string>> {
         try {
             await this.territoriesModel.update(

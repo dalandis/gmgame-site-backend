@@ -2,10 +2,14 @@ import { Controller, Get, UseGuards, Request, Response, Post, Body, HttpStatus }
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { CreateUserDto } from '../validator/create.user';
+import { UtilsService } from '../Utils/utils.service';
 
 @Controller('/api')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly utilsService: UtilsService
+    ) {}
 
     @UseGuards(AuthenticatedGuard)
     @Get('/profile')
@@ -14,7 +18,8 @@ export class UsersController {
 
         res.send({
             discordUser: req.user,
-            user: user
+            user: user,
+            status: await this.utilsService.getStatus(user.status)
         });
     }
 

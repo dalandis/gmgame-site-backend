@@ -10,7 +10,7 @@ async function bootstrap() {
     app.use(cookieSession({
         name: 'session',
         keys: [process.env.SECRET_SESSION],
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000 // 24 часа
     }))
 
     app.use(passport.initialize());

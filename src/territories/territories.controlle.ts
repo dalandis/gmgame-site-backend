@@ -2,10 +2,14 @@ import { Controller, Get, UseGuards, Request, Response, Param, Post, Body, HttpS
 import { TerritoriesService } from './territories.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { territoriesDto } from '../validator/save_edit.territories';
+import { UtilsService } from '../Utils/utils.service';
 
 @Controller('/api')
 export class TerritoriesController {
-    constructor(private readonly territoriesService: TerritoriesService) {}
+    constructor(
+        private readonly territoriesService: TerritoriesService,
+        private readonly utilsService: UtilsService
+    ) {}
 
     @UseGuards(AuthenticatedGuard)
     @Get('/get_territories')
@@ -25,7 +29,7 @@ export class TerritoriesController {
 
         res.send({
             terr: terr,
-            world_name: await this.territoriesService.getWorldName(terr.world || '')
+            world_name: await this.utilsService.getWorldName(terr.world || '')
         });
     }
 
