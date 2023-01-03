@@ -13,7 +13,7 @@ export class AuthController {
     @Get('/callback')
     discordAuthCallback(@Request() req, @Response() res) {
         if (req.user) {
-            res.redirect('/api/');
+            res.redirect('/cab/profile');
         } else {
             res.status(500);
         }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -11,9 +11,14 @@ import { TerritoriesModule } from './territories/territories.module';
 import { MarkersModule } from './markers/markers.module';
 import { AwardsModule } from './awards/awards.module';
 import { ExternalApiModule } from './external-api/external-api.module';
+import {ServeStaticModule} from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '../..', 'gmgame-site', 'build'),
+        }),
         ConfigModule.forRoot({
             envFilePath: '.env'
         }),
@@ -41,3 +46,18 @@ import { ExternalApiModule } from './external-api/external-api.module';
     providers: [AppService],
 })
 export class AppModule {}
+// export class AppModule implements NestModule {
+
+//     public configure(consumer: MiddlewareConsumer) {
+  
+//         consumer.apply(LdapMiddleware).
+//         exclude({path: 'api/', method: RequestMethod.ALL},
+//                 {path: 'auth/google/callback', method: RequestMethod.ALL},
+//                 {path: 'config.json', method: RequestMethod.ALL}).
+//         forRoutes(AppController);
+    
+//         consumer.apply(RouteLoggingMiddleware).forRoutes(UsersController);
+//         consumer.apply(RouteLoggingMiddleware).forRoutes(RolesController);
+//     }
+  
+//   }
