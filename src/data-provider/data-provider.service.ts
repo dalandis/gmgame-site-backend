@@ -1,0 +1,48 @@
+import { Injectable } from '@nestjs/common';
+import axios, { AxiosResponse } from 'axios';
+import { ConfigModule } from '@nestjs/config';
+
+ConfigModule.forRoot({
+    envFilePath: '.env.server-api',
+});
+
+@Injectable()
+export class DataProviderService {
+
+    public async sendDiscordWebHook(content: string, username: string): Promise<string> {
+        return axios.request({
+            data: {
+                content: content,
+                username: username,
+                allowed_mentions: {
+                    parse: ['users'],
+                    users: []
+                }
+            },
+            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            url: this.getUrlWebhook(username)
+        });
+    }
+
+    public async sendToServerApi(payload: Record<string,string|number>, url: string, method: string): Promise<AxiosResponse> {
+        return axios.request({
+            data: JSON.stringify(payload),
+            method: method,
+            url: process.env.URL_FOR_SERVER_API + url,
+            headers: {
+                Authorization: 'Bearer ' + process.env.TOKEN_FOR_SERVER_API,
+                'Content-type': 'application/json'
+            }
+        })
+    }
+
+    private getUrlWebhook(username: string): string {
+        switch (username) {
+            case 'Yakubovich':
+                return process.env.URL_WEBHOOK_FOR_REWARDS
+            case 'applicant':
+                return process.env.URL_WEBHOOK_FOR_REG
+        }
+    }
+}

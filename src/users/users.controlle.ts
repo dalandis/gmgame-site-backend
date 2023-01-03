@@ -19,14 +19,14 @@ export class UsersController {
         res.send({
             discordUser: req.user,
             user: user,
-            status: await this.utilsService.getStatus(user.status)
+            status: await this.utilsService.getStatus(user?.status || 0),
+            version: '1.19.2'
         });
     }
 
     @UseGuards(AuthenticatedGuard)
     @Post('/registration_user')
     async regUser(@Request() req, @Body() body: CreateUserDto, @Response() res): Promise<any> {
-        
         const message = await this.usersService.addUser(body, req.user)
         console.log(message);
         res.send(JSON.stringify(message));

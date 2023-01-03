@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import { Awards } from '../awards/awards.model';
 
 @Table({tableName: 'users'})
 export class User extends Model<User> {
@@ -37,4 +38,7 @@ export class User extends Model<User> {
 
     @Column({ type: DataType.DATE, allowNull: true })
     reg_date: number;
+
+    // @HasMany(() => Awards, {foreignKey: 'user_id'})
+    // awards: Awards[];
 }

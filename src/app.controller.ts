@@ -6,8 +6,8 @@ import {AuthenticatedGuard} from './auth/guards/authenticated.guard';
 export class AppController {
     constructor(private readonly appService: AppService) {}
 
-    // @Get('/')
-    // async getHello(@Request() req): Promise<{discordUser: Record<string,string>}> {
-    //     return {discordUser: req.user};
-    // }
+    @Get('/')
+    async getUser(@Request() req): Promise<{discordUser: Record<string,string>}> {
+        return {discordUser: req.user};
+    }
 }

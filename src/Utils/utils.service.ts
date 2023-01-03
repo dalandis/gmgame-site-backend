@@ -31,4 +31,20 @@ export class UtilsService {
                 return 'Новая заявка';
         }
     }
+
+    public getAccountType(type: number): string {
+        if (type == 1) {
+            return 'Лицензия';
+        }
+
+        return 'Пиратка';
+    }
+
+    public getDiscord(discordUser): string {
+        if (discordUser.discriminator) {
+            return `${discordUser.username}#${discordUser.discriminator}`;
+        }
+
+        return discordUser.id;
+    }
 }

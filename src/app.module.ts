@@ -9,6 +9,8 @@ import { User } from './users/users.model';
 import { UsersModule } from './users/users.module';
 import { TerritoriesModule } from './territories/territories.module';
 import { MarkersModule } from './markers/markers.module';
+import { AwardsModule } from './awards/awards.module';
+import { ExternalApiModule } from './external-api/external-api.module';
 
 @Module({
     imports: [
@@ -16,9 +18,11 @@ import { MarkersModule } from './markers/markers.module';
             envFilePath: '.env'
         }),
         AuthModule,
+        ExternalApiModule,
         UsersModule,
         TerritoriesModule,
         MarkersModule,
+        AwardsModule,
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',
