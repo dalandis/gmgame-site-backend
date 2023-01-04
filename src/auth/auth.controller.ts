@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Response } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Response, Next, Post } from '@nestjs/common';
 import {LoginGuard} from './guards/login.guard';
 
 @Controller('/api')
@@ -17,5 +17,12 @@ export class AuthController {
         } else {
             res.status(500);
         }
+    }
+
+    @Post('/logout')
+    logout(@Request() req, @Response() res, @Next() next) {
+        req.logout();
+
+        return res.send({ authenticated: req.isAuthenticated() });
     }
 }
