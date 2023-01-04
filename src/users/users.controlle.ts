@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards, Request, Response, Post, Body, HttpStatus } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { CreateUserDto } from '../validator/create.user';
+import { CreateUserDto, ChangePasswordDto } from '../validator/create.user';
 import { UtilsService } from '../Utils/utils.service';
 
 @Controller('/api')
@@ -28,7 +28,15 @@ export class UsersController {
     @Post('/registration_user')
     async regUser(@Request() req, @Body() body: CreateUserDto, @Response() res): Promise<any> {
         const message = await this.usersService.addUser(body, req.user)
-        console.log(message);
+ 
+        res.send(JSON.stringify(message));
+    }
+
+    @UseGuards(AuthenticatedGuard)
+    @Post('/change_password')
+    async changePassword(@Request() req, @Body() body: ChangePasswordDto, @Response() res): Promise<any> {
+        const message = await this.usersService.changePassword(body, req.user)
+
         res.send(JSON.stringify(message));
     }
 }

@@ -33,3 +33,9 @@ export class CreateUserDto {
     @IsString()
     friend_name: string;
 }
+
+export class ChangePasswordDto {
+    @IsNotEmpty()
+    @IsString()
+    password: string
+}

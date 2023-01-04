@@ -50,7 +50,7 @@ export class TerritoriesController {
     }
 
     @UseGuards(AuthenticatedGuard)
-    @Post('delete_mterr')
+    @Post('delete_terr')
     async deleteTerr(@Request() req, @Body() body: territoriesDto, @Response() res): Promise<any> {
         const message = await this.territoriesService.deleteTerritories(body, req.user.id);
         console.log(message);

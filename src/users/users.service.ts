@@ -71,4 +71,19 @@ export class UsersService {
 
         this.dataProviderService.sendDiscordWebHook(data, 'applicant');
     }
+
+    async changePassword(params, user) {
+        const payload = {
+            password: params.password,
+            username: user.localuser.username
+        };
+
+        const result = await this.dataProviderService.sendToServerApi(payload, '/change_password_new', 'POST');
+        
+        if (result.status != 200) {
+            return {error: `password is not change: ${result.status}`};
+        }
+
+        return {message: 'password is change'};
+     }
 }
