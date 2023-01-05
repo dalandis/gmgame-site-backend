@@ -79,5 +79,17 @@ export class ExternalApiController {
 
         res.send(JSON.stringify(response));
     }
+
+    @Post('/vote_handler')
+    async voteHandler(@Request() req, @Response() res, @Body() body): Promise<any> {
+        const response = await this.externalApiService.voteHandler(body);
+
+        if (response.error) {
+            res.status(HttpStatus.BAD_REQUEST).json(response);
+            return;
+        }
+
+        res.send(JSON.stringify(response));
+    }
 }
 

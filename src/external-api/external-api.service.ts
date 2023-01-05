@@ -3,14 +3,23 @@ import { createUserDto, checkUserDto, decisionUserDto } from '../validator/exter
 import { ConfigModule } from '@nestjs/config';
 import {UsersService} from '../users/users.service';
 import { User } from '../users/users.model';
+import { Awards } from '../awards/awards.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
+import * as crypto from 'crypto';
 
 ConfigModule.forRoot({
-    envFilePath: '.env.discord'
+    envFilePath: '.env.api'
 });
+
+interface ISignData{
+    project?: string,
+    timestamp: string,
+    username: string,
+    signature: string
+}
 
 @Injectable()
 export class ExternalApiService {
@@ -18,8 +27,10 @@ export class ExternalApiService {
         private readonly userService: UsersService,
         @InjectModel(User)
         private userModel: typeof User,
+        @InjectModel(Awards)
+        private awardsModel: typeof Awards,
         private readonly utilsService: UtilsService,
-        private readonly dataProviderService: DataProviderService,
+        private readonly dataProviderService: DataProviderService
     ) {}
 
     async createUser(params: createUserDto, username: string): Promise<Record<string,string|number>> {
@@ -155,5 +166,82 @@ export class ExternalApiService {
         } catch (err) {
             return { "error": "unknown error", "status_code": 400, "status": null };
         }
+    }
+
+    async voteHandler(params): Promise<Record<string,string|number>> {
+        try{
+            const username = params.username || params.nick;
+
+            const signData: ISignData = {
+                project: params.project,
+                timestamp: params.timestamp || params.time,
+                username: username,
+                signature: params.signature || params.sign
+            }
+
+            if (this.checkSign(signData)) {
+                return { "error": "Переданные данные не прошли проверку", "status_code": 400, "status": null };
+            }
+
+            const prize: string = this.getPrize();
+
+            if (!prize) { 
+                return
+            };
+
+            const user = await this.userModel.findOne({
+                where: {
+                    username: username
+                },
+                attributes: ['user_id']
+            });
+
+            if (user?.user_id) {
+                await this.awardsModel.create({ 
+                    type: prize,
+                    user_id: user.user_id,
+                    issued: 0
+                });
+            }
+
+            const dataToBot = {
+                username: username,
+                prize: prize
+            }
+
+            this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST')
+
+            return {"success": "ok", "status_code": 200, "error": "", "data": "" };
+        } catch (err) {
+            return { "error": "unknown error", "status_code": 400, "status": null };
+        }
+    }
+
+    private checkSign(params: ISignData): boolean {
+        let selfSign: string;
+
+        if (params.project) {
+            const secretString = [params.project, process.env.SECRET_KEY_FOR_VOTE_MINESERV, params.timestamp, params.username].join('.');
+
+            selfSign = crypto.createHash('sha256').update(secretString).digest("hex");
+        } else {
+            const secretString = params.username + params.timestamp + process.env.SECRET_KEY_FOR_VOTE_HOTMC;
+
+            selfSign = crypto.createHash('sha1').update(secretString).digest("hex");
+        }
+
+        return params.signature !== selfSign;
+    }
+
+    private getPrize(): string {
+        if (Math.random() < Number(process.env.CHANCE_TOOLS)) {
+            return 'tools';
+        }
+
+        if (Math.random() < Number(process.env.CHANCE_MONEY)) {
+            return 'money';
+        }
+
+        return '';
     }
 }
