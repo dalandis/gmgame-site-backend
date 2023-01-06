@@ -25,6 +25,10 @@ export class MarkersController {
     @UseGuards(AuthenticatedGuard)
     @Get('/get_marker/:id_marker')
     async getMarker(@Request() req, @Response() res, @Param() params): Promise<any> {
+        if (params.id_marker === 'new') {
+            return res.send({});
+        }
+
         const marker = await this.markersService.getMarker(req.user.id, params.id_marker);
 
         res.send({

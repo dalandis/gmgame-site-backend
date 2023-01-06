@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsInt, Matches} from 'class-validator';
+import {IsNotEmpty, IsInt, Matches, IsOptional, IsEmpty} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class markersDto {
@@ -24,8 +24,8 @@ export class markersDto {
     @IsInt()
     z: number;
 
-    @IsNotEmpty()
-    @Matches('^[a-zA-Z0-9а-яА-Я !_-]+$')
+    @IsOptional()
+    @IsEmpty()
     description: string;
 
     @Type(() => Number)
