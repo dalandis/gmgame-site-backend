@@ -17,7 +17,7 @@ import { join } from 'path';
 @Module({
     imports: [
         ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '../..', 'gmgame-site', 'build'),
+            rootPath: join(__dirname, '../..', 'gmgame-site', 'build')
         }),
         ConfigModule.forRoot({
             envFilePath: '.env'
@@ -46,6 +46,7 @@ import { join } from 'path';
     providers: [AppService],
 })
 export class AppModule {}
+
 // export class AppModule implements NestModule {
 
 //     public configure(consumer: MiddlewareConsumer) {

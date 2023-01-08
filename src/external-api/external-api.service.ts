@@ -185,8 +185,15 @@ export class ExternalApiService {
 
             const prize: string = this.getPrize();
 
+            const dataToBot = {
+                username: username,
+                prize: prize
+            };
+
+            this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST');
+
             if (!prize) { 
-                return
+                return {"success": "ok", "status_code": 200, "error": "", "data": "" };
             };
 
             const user = await this.userModel.findOne({
@@ -203,13 +210,6 @@ export class ExternalApiService {
                     issued: 0
                 });
             }
-
-            const dataToBot = {
-                username: username,
-                prize: prize
-            }
-
-            this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST')
 
             return {"success": "ok", "status_code": 200, "error": "", "data": "" };
         } catch (err) {

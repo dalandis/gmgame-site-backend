@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
+import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { ExternalApiService } from './external-api.service';
 import { createUserDto, getStatusrDto, checkUserDto, decisionUserDto } from '../validator/external-api/create-user';
 import {LoginGuardBearer} from '../auth/guards/login.guard';
 import {RoleGuard} from '../auth/roles/api-roles';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @Controller('/api')
 export class ExternalApiController {
@@ -81,6 +82,7 @@ export class ExternalApiController {
     }
 
     @Post('/vote_handler')
+    @FormDataRequest()
     async voteHandler(@Request() req, @Response() res, @Body() body): Promise<any> {
         const response = await this.externalApiService.voteHandler(body);
 
@@ -89,7 +91,7 @@ export class ExternalApiController {
             return;
         }
 
-        res.send(JSON.stringify(response));
+        res.send(response.success);
     }
 }
 
