@@ -13,6 +13,7 @@ import { AwardsModule } from './awards/awards.module';
 import { ExternalApiModule } from './external-api/external-api.module';
 import {ServeStaticModule} from '@nestjs/serve-static';
 import { join } from 'path';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { join } from 'path';
         TerritoriesModule,
         MarkersModule,
         AwardsModule,
+        StatisticsModule,
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',
