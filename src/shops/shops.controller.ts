@@ -9,7 +9,7 @@ export class ShopsController {
     @Get('/get_shops')
     async getShops(@Request() req, @Response() res): Promise<any> {
         const response = await this.shopsService.getShops();
-
+        console.log(response);
         res.send(response);
     }
 }

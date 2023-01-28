@@ -6,7 +6,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../users/users.model';
 
 interface IProfile extends Profile {
-    localuser?: User
+    localuser?: User;
+    role: string;
 }
 
 ConfigModule.forRoot({
@@ -40,9 +41,18 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
 
             if (user) {
                 profile.localuser = user;
+                profile.role = this.getRole(profile.id)
             }
 
             return profile;
         }
+    }
+
+    private getRole(id: string): string {
+        if (['274466897070915584'].includes(id)) {
+            return 'admin';
+        }
+        
+        return 'user';
     }
 }
