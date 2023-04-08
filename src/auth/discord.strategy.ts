@@ -36,23 +36,28 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
                 where: {
                     user_id: profile.id
                 },
-                attributes: ['username', 'type']
+                attributes: ['username', 'type', 'status']
             });
+
+            profile.role = this.getRole(profile.id, user.status);
 
             if (user) {
                 profile.localuser = user;
-                profile.role = this.getRole(profile.id)
             }
 
             return profile;
         }
     }
 
-    private getRole(id: string): string {
+    private getRole(id: string, status: number): string {
         if (['274466897070915584'].includes(id)) {
             return 'admin';
         }
-        
+
+        if (status === 2) {
+            return 'player';
+        }
+
         return 'user';
     }
 }

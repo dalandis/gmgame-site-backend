@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards, Request, Response, Post, Body, HttpStatus } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { CreateUserDto, ChangePasswordDto } from '../validator/create.user';
 import { UtilsService } from '../Utils/utils.service';
+import { RoleGuard } from '../auth/roles/api-roles';
 
 @Controller('/api')
 export class UsersController {
@@ -32,7 +33,8 @@ export class UsersController {
         res.send(JSON.stringify(message));
     }
 
-    @UseGuards(AuthenticatedGuard)
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('/change_password')
     async changePassword(@Request() req, @Body() body: ChangePasswordDto, @Response() res): Promise<any> {
         const message = await this.usersService.changePassword(body, req.user)

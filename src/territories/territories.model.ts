@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, HasOne, Model, Table } from "sequelize-typescript";
+import { User } from '../users/users.model';
 
 @Table({tableName: 'territories'})
 export class Territories extends Model<Territories> {
@@ -25,4 +26,7 @@ export class Territories extends Model<Territories> {
 
     @Column({ type: DataType.STRING, allowNull: true })
     world: string;
+
+    @HasOne(() => User, {sourceKey: 'user', foreignKey: 'user_id'})
+    player: User;
 }

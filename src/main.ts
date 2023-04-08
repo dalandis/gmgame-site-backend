@@ -2,7 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
-var cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session')
+const Queue = require('bull')
+const { createBullBoard } = require('bull-board')
+const { BullAdapter } = require('bull-board/bullAdapter')
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -17,6 +20,12 @@ async function bootstrap() {
     app.use(passport.session());
 
     app.useGlobalPipes(new ValidationPipe());
+
+    const { router, setQueues, replaceQueues, addQueue, removeQueue } = createBullBoard([
+        new BullAdapter(new Queue('users')),
+      ])
+    
+    app.use('/admin/queues', router);
     
     await app.listen(3001);
 }

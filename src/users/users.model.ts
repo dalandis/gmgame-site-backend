@@ -1,5 +1,7 @@
 import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import { Markers } from "../markers/markers.model";
 import { Awards } from '../awards/awards.model';
+import { Territories } from "../territories/territories.model";
 
 @Table({tableName: 'users'})
 export class User extends Model<User> {
@@ -38,6 +40,12 @@ export class User extends Model<User> {
 
     @Column({ type: DataType.DATE, allowNull: true })
     reg_date: number;
+
+    @HasMany(() => Markers, {sourceKey: 'user_id', foreignKey: 'user'})
+    markers: Markers[];
+
+    @HasMany(() => Territories, {sourceKey: 'user_id', foreignKey: 'user'})
+    territories: Territories;
 
     // @HasMany(() => Awards, {foreignKey: 'user_id'})
     // awards: Awards[];

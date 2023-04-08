@@ -11,19 +11,29 @@ import { TerritoriesModule } from './territories/territories.module';
 import { MarkersModule } from './markers/markers.module';
 import { AwardsModule } from './awards/awards.module';
 import { ExternalApiModule } from './external-api/external-api.module';
-import {ServeStaticModule} from '@nestjs/serve-static';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { StatisticsModule } from './statistics/statistics.module';
 import { ShopsModule } from './shops/shops.module';
 import { AdminModule } from './admin/admin.module';
+import { BullModule } from '@nestjs/bull';
+import { ProcessQueuesModule } from './process-queues/process-queues.module';
+import { LogsModule } from './logs/logs.module';
 
 @Module({
     imports: [
         ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '../..', 'gmgame-site', 'build')
+            rootPath: join(__dirname, '../..', 'gmgame-site', 'build'),
+            exclude: ['(.*)'],
         }),
         ConfigModule.forRoot({
             envFilePath: '.env'
+        }),
+        BullModule.forRoot({
+            redis: {
+                host: 'localhost',
+                port: 6379,
+            },
         }),
         AuthModule,
         ExternalApiModule,
@@ -34,6 +44,8 @@ import { AdminModule } from './admin/admin.module';
         StatisticsModule,
         ShopsModule,
         AdminModule,
+        ProcessQueuesModule,
+        LogsModule,
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',
@@ -42,7 +54,6 @@ import { AdminModule } from './admin/admin.module';
                 username: process.env.MYSQL_DB_USER,
                 password: process.env.MYSQL_DB_PASSWORD,
                 database: process.env.MYSQL_DB_NAME,
-                models: [User],
                 autoLoadModels: true,
                 logging: console.log
             })

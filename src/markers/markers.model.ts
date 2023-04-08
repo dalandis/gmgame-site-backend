@@ -1,4 +1,6 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, HasOne, Model, Table } from "sequelize-typescript";
+import { User } from "../users/users.model";
+// import { User } from '../users/users.model';
 
 @Table({tableName: 'markers'})
 export class Markers extends Model<Markers> {
@@ -31,4 +33,9 @@ export class Markers extends Model<Markers> {
 
     @Column({ type: DataType.INTEGER, allowNull: false })
     flag: number;
+
+    // @BelongsTo(() => User, {foreignKey: 'user', targetKey: 'user_id'})
+    // player: User
+    @HasOne(() => User, {sourceKey: 'user', foreignKey: 'user_id'})
+    player: User;
 }

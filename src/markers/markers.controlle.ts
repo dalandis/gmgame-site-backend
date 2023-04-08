@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards, Request, Response, Param, Post, Body, HttpStatus } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Response, Param, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { MarkersService } from './markers.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { markersDto } from '../validator/save_edit.markers';
 import { UtilsService } from '../Utils/utils.service';
+import { RoleGuard } from '../auth/roles/api-roles';
 
 @Controller('/api')
 export class MarkersController {
@@ -10,8 +11,9 @@ export class MarkersController {
         private readonly markersService: MarkersService,
         private readonly utilsService: UtilsService
     ) {}
-
-    @UseGuards(AuthenticatedGuard)
+    
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Get('/get_markers')
     async getMarkers(@Request() req, @Response() res): Promise<any> {
         const markers = await this.markersService.getMarkers(req.user.id);
@@ -22,7 +24,8 @@ export class MarkersController {
         });
     }
 
-    @UseGuards(AuthenticatedGuard)
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Get('/get_marker/:id_marker')
     async getMarker(@Request() req, @Response() res, @Param() params): Promise<any> {
         if (params.id_marker === 'new') {
@@ -37,7 +40,8 @@ export class MarkersController {
         });
     }
 
-    @UseGuards(AuthenticatedGuard)
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('/edit_marker')
     async editMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.editMarker(body, req.user.id);
@@ -45,7 +49,8 @@ export class MarkersController {
         res.send(JSON.stringify(message));
     }
 
-    @UseGuards(AuthenticatedGuard)
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('add_marker')
     async addMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.addMarker(body, req.user.id);
@@ -53,7 +58,8 @@ export class MarkersController {
         res.send(JSON.stringify(message));
     }
 
-    @UseGuards(AuthenticatedGuard)
+    @SetMetadata('role', 'player')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('delete_marker')
     async deleteMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.deleteMarker(body, req.user.id);

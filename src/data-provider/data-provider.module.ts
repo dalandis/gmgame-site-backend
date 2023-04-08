@@ -5,4 +5,4 @@ import { DataProviderService } from './data-provider.service';
     providers: [DataProviderService]
 })
 
-export class UtilsModule {}
+export class DataProviderMpdule {}
