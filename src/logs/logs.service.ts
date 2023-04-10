@@ -10,7 +10,7 @@ export class LogsService {
     ) {}
 
     public async logger(log: string, type: string, user_id: string, manager: string, managerId: string, logDate?: Date) {
-        await this.logsModel.create({
+        this.logsModel.create({
             log,
             type,
             user_id,

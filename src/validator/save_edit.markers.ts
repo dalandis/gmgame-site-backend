@@ -25,7 +25,7 @@ export class markersDto {
     z: number;
 
     @IsOptional()
-    @IsEmpty()
+    @IsNotEmpty()
     description: string;
 
     @Type(() => Number)

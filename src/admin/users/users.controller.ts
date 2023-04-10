@@ -1,6 +1,6 @@
 import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { UserAdminService } from './users.service';
-import { getUserDto, actionUserDto, markersDto, logsDto } from '../../validator/admin/users-admin';
+import { getUserDto, actionUserDto, markersDto, logsDto, markersUpdateDto, terrUpdateDto } from '../../validator/admin/users-admin';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { RoleGuard } from '../../auth/roles/api-roles';
 
@@ -72,16 +72,15 @@ export class UserAdminController {
         res.send(JSON.stringify(response));
     }
 
-    // @SetMetadata('role', 'admin')
-    // @UseGuards(AuthenticatedGuard, RoleGuard)
-    // @Post('/update_marker')
-    // async updateMarker(@Request() req, @Response() res, @Body() body: markersDto): Promise<void> {
-    //     const response = await this.userAdminService.updateMarker(body, req.user);
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/update_marker')
+    async updateMarker(@Request() req, @Response() res, @Body() body: markersUpdateDto): Promise<void> {
+        const response = await this.userAdminService.updateMarker(body, req.user);
 
-    //     res.send(JSON.stringify(response));
-    // }
+        res.send(JSON.stringify(response));
+    }
 
-    //get_logs
     @SetMetadata('role', 'admin')
     @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('/get_logs')
@@ -92,6 +91,15 @@ export class UserAdminController {
             res.send(JSON.stringify({error: 'Нет логов'}));
             return;
         }
+
+        res.send(JSON.stringify(response));
+    }
+
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/update_territory')
+    async updateTerritory(@Request() req, @Response() res, @Body() body: terrUpdateDto): Promise<void> {
+        const response = await this.userAdminService.updateTerritory(body, req.user);
 
         res.send(JSON.stringify(response));
     }

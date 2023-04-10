@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { actionUserDto, getUserDto } from '../../validator/admin/users-admin';
+import { actionUserDto, getUserDto, markersUpdateDto, terrUpdateDto } from '../../validator/admin/users-admin';
 import { User } from '../../users/users.model';
 import { Markers } from '../../markers/markers.model';
 import { Territories } from '../../territories/territories.model';
@@ -38,7 +38,6 @@ export class UserAdminService {
             attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note']
         });
 
-        console.log(user)
         return user;
     }
 
@@ -105,7 +104,8 @@ export class UserAdminService {
         const marker = await this.markersModel.findOne({
             where: {
                 id: id
-            }
+            },
+            attributes: ['name', 'x', 'y', 'z', 'id_type', 'description', 'user']
         }).then((marker) => {
             this.markersModel.destroy({
                 where: {
@@ -130,26 +130,78 @@ export class UserAdminService {
         return this.logsService.getLogs(id);
     }
 
-    //update_marker
-    // async updateMarker(id: number, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
-        // const marker = await this.markersModel.findOne({
-        //     where: {
-        //         id: id
-        //     }
-        // }).then((marker) => {
-        //     this.markersModel.update(
-        //         {
-        //             status: 1
-        //         },
-        //         {
-        //             where: {
-        //                 id: id
-        //             }
-        //         }
-        //     );
-        //     return marker;
-        // }
-    // }
+    async updateMarker(body: markersUpdateDto, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
+        console.log(body)
+        const marker = await this.markersModel.findOne({
+            where: {
+                id: body.id
+            },
+            attributes: ['name', 'x', 'y', 'z', 'id_type', 'description', 'user']
+        }).then((marker) => {
+            this.markersModel.update(
+                {
+                    name: body.name,
+                    x: body.x,
+                    y: body.y,
+                    z: body.z,
+                    id_type: body.id_type,
+                    description: body.description
+                },
+                {
+                    where: {
+                        id: body.id
+                    }
+                }
+            );
+            return marker;
+        });
 
-    
+
+
+        this.logsService.logger(
+            JSON.stringify({action: 'update-marker', data: {oldMarker: marker, newMarker: body}}),
+            'update-marker',
+            marker.user,
+            manager.localuser.username,
+            manager.id
+        );
+
+        return { result: true, message: 'Маркер обновлен' };
+    }  
+
+    async updateTerritory(body: terrUpdateDto, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
+        const territory = await this.territoriesModel.findOne({
+            where: {
+                id: body.id
+            },
+            attributes: ['name', 'world', 'xStart', 'xStop', 'zStart', 'zStop', 'user']
+        }).then((territory) => {
+            this.territoriesModel.update(
+                {
+                    name: body.name,
+                    world: body.world,
+                    xStart: body.xStart,
+                    xStop: body.xStop,
+                    zStart: body.zStart,
+                    zStop: body.zStop
+                },
+                {
+                    where: {
+                        id: body.id
+                    }
+                }
+            );
+            return territory;
+        });
+
+        this.logsService.logger(
+            JSON.stringify({action: 'update-territory', data: {oldTerritory: territory, newTerritory: body}}),
+            'update-territory',
+            territory.user,
+            manager.localuser.username,
+            manager.id
+        );
+
+        return { result: true, message: 'Территория обновлена' };
+    }
 }
