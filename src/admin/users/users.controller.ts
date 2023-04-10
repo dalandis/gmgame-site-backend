@@ -1,6 +1,6 @@
 import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { UserAdminService } from './users.service';
-import { getUserDto, actionUserDto, markersDto } from '../../validator/admin/users-admin';
+import { getUserDto, actionUserDto, markersDto, logsDto } from '../../validator/admin/users-admin';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { RoleGuard } from '../../auth/roles/api-roles';
 
@@ -80,5 +80,20 @@ export class UserAdminController {
 
     //     res.send(JSON.stringify(response));
     // }
+
+    //get_logs
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/get_logs')
+    async getLogs(@Request() req, @Response() res, @Body() body: logsDto): Promise<string> {
+        const response = await this.userAdminService.getLogs(body.id);
+
+        if (!response) {
+            res.send(JSON.stringify({error: 'Нет логов'}));
+            return;
+        }
+
+        res.send(JSON.stringify(response));
+    }
 
 }

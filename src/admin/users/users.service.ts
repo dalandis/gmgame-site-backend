@@ -35,7 +35,7 @@ export class UserAdminService {
                     {username: params.searchParam}
                 ]
             },
-            attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age']
+            attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note']
         });
 
         return user;
@@ -123,6 +123,10 @@ export class UserAdminService {
         );
         
         return { result: true, message: 'Маркер удален' };
+    }
+
+    async getLogs(id): Promise<any> {
+        return this.logsService.getLogs(id);
     }
 
     //update_marker

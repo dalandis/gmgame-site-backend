@@ -1,4 +1,4 @@
-import {IsInt, IsNotEmpty, IsString} from 'class-validator';
+import {IsInt, IsNotEmpty, IsString, isString} from 'class-validator';
 
 export class getUserDto {
     @IsNotEmpty()
@@ -20,4 +20,10 @@ export class markersDto {
     @IsNotEmpty()
     @IsInt()
     id: number;
+}
+
+export class logsDto {
+    @IsNotEmpty()
+    @IsString()
+    id: string;
 }

@@ -19,4 +19,15 @@ export class LogsService {
             log_date: logDate || new Date(),
         });
     }
+
+    public async getLogs(id): Promise<Logs[]> {
+        return await this.logsModel.findAll({
+            where: {
+                user_id: id,
+            },
+            order: [
+                ['log_date', 'ASC'],
+            ],
+        });
+    }
 }
