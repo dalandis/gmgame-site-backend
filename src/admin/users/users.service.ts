@@ -23,8 +23,8 @@ export class UserAdminService {
         private logsService: LogsService
     ) {}
 
-    async getUser(params: getUserDto): Promise<User> {
-        const user = await this.userModel.findOne({
+    async getUser(params: getUserDto): Promise<User[]> {
+        const user = await this.userModel.findAll({
             include: [
                 {model: this.markersModel},
                 {model: this.territoriesModel}
@@ -32,12 +32,13 @@ export class UserAdminService {
             where: {
                 [Op.or]: [
                     {user_id: params.searchParam},
-                    {username: params.searchParam}
+                    {username: {[Op.like]: params.searchParam}}
                 ]
             },
             attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note']
         });
 
+        console.log(user)
         return user;
     }
 

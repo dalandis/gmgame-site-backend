@@ -56,7 +56,7 @@ export class UsersService {
     }
 
     private async sendWebhook(params, discordUser) {
-       const data = `
+       const data = '```' + `
             (test)
             Игровой ник: ${params.login}
             Аккаунт: ${this.utilsService.getAccountType(params.type)}
@@ -67,7 +67,7 @@ export class UsersService {
             Заявка от: ${params.partner}
             Дискорд: ${this.utilsService.getDiscord(discordUser)}
             <@${discordUser.id}>
-        `;
+        ` + '```';
 
         this.dataProviderService.sendDiscordWebHook(data, 'applicant');
     }

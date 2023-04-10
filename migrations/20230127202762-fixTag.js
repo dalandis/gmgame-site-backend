@@ -9,7 +9,7 @@ module.exports = {
 
     users[0].map(async user => {
       try {
-        let fixTag = user.tag.replace(/'/g, '"').replace(/True/g, true).replace(/False/g, false);
+        let fixTag = user.tag.replace(/'/g, '"').replace(/True/g, true).replace(/False/g, false).replace(/None/g, null);
         await queryInterface.sequelize.query(
           'UPDATE users SET tag = :newTag WHERE username = :username',
           {
