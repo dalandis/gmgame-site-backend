@@ -8,10 +8,10 @@ export class User extends Model<User> {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number; //INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
-    @Column({ type: DataType.STRING, unique: true, allowNull: false })
+    @Column({ type: DataType.STRING, unique: true, allowNull: true })
     username: string; //VARCHAR(100) NOT NULL UNIQUE,
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: true })
     password: string; //VARCHAR(100) NOT NULL,
 
     @Column({ type: DataType.JSON, allowNull: false })
@@ -39,13 +39,25 @@ export class User extends Model<User> {
     partner: string; //VARCHAR(255)
 
     @Column({ type: DataType.DATE, allowNull: true })
-    reg_date: number;
+    reg_date: Date;
 
     @HasMany(() => Markers, {sourceKey: 'user_id', foreignKey: 'user'})
     markers: Markers[];
 
     @HasMany(() => Territories, {sourceKey: 'user_id', foreignKey: 'user'})
     territories: Territories;
+
+    @Column({ type: DataType.BOOLEAN, allowNull: true })
+    immun: boolean;
+
+    @Column({ type: DataType.STRING, allowNull: true })
+    note: string;
+
+    @Column({ type: DataType.DATE, allowNull: true })
+    expiration_date: Date;
+
+    @Column({ type: DataType.BOOLEAN, allowNull: true })
+    is_discord: boolean;
 
     // @HasMany(() => Awards, {foreignKey: 'user_id'})
     // awards: Awards[];

@@ -8,10 +8,11 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { BullModule } from '@nestjs/bull';
 import { LogsService } from '../../logs/logs.service';
 import { Logs } from '../../logs/logs.model';
+import { Regens } from './regens.model';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([User, Markers, Territories, Logs]),
+        SequelizeModule.forFeature([User, Markers, Territories, Logs, Regens]),
         BullModule.registerQueue({
             name: 'users',
         }),

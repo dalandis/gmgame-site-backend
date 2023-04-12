@@ -9,6 +9,8 @@ import { Op } from 'sequelize';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import * as crypto from 'crypto';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 
 ConfigModule.forRoot({
     envFilePath: '.env.api'
@@ -30,7 +32,9 @@ export class ExternalApiService {
         @InjectModel(Awards)
         private awardsModel: typeof Awards,
         private readonly utilsService: UtilsService,
-        private readonly dataProviderService: DataProviderService
+        private readonly dataProviderService: DataProviderService,
+        @InjectQueue('users') 
+        private usersQueue: Queue,
     ) {}
 
     async createUser(params: createUserDto, username: string): Promise<Record<string,string|number>> {
@@ -112,41 +116,88 @@ export class ExternalApiService {
     }
 
     async acceptUser(params: decisionUserDto): Promise<Record<string,string|number>> {
-        try{
-            const user = await this.userModel.findOne({
-                where: {
-                    user_id: params.user
-                },
-                attributes: ['username', 'password', 'type']
-            });
+        const job = await this.usersQueue.getJob(`${params.user}-accept`);
 
-            const payload = {
-                "username" : user.username,
-                "password" : user.password,
-                "type" : user.type
-            }
-
-            const response = await this.dataProviderService.sendToServerApi(payload, 'add_user_new', 'POST');
-
-            if (response.status != 200) {
-                return { "error": `error add user, ${response.status}`, "status_code": 400, "status": null }
-            }
-
-            await this.userModel.update(
-                {
-                    status: 2
-                },
-                {
-                    where: {
-                        user_id: params.user
-                    }
-                }
-            );
-
-            return {"success": "ok", "status_code": 200, "error": "", "data": "" };
-        } catch (err) {
-            return { "error": "unknown error", "status_code": 400, "status": null };
+        if (job && job.data.action === 'accept-user') {
+            return { "error": 'task in work', "status_code": 400, "status": null }
         }
+
+        const user = await this.userModel.findOne({
+            where: {
+                user_id: params.user
+            },
+            attributes: ['username', 'password', 'type']
+        });
+
+        this.usersQueue.add(
+            {
+                action: 'accept-user',
+                id: params.user,
+                username: user.username,
+                manager: 'gmgame bot',
+                managerName: 'gmgame bot'
+            },
+            {
+                jobId: `${params.user}-accept`,
+                removeOnComplete: true
+            }
+        );
+
+        return {"success": "ok", "status_code": 200, "error": "", "data": "" };
+
+        // try{
+        //     const user = await this.userModel.findOne({
+        //         where: {
+        //             user_id: params.user
+        //         },
+        //         attributes: ['username', 'password', 'type']
+        //     });
+
+        //     const isDiscord = await this.dataProviderService.sendToBot({user: params.user}, 'check_user_define', 'POST');
+
+        //     const days = isDiscord.data ? 60 : 14;
+        //     const date = new Date();
+        //     date.setDate(date.getDate() + days);
+
+        //     this.userModel.update(
+        //         {
+        //             expiration_date: date,
+        //             is_discord: isDiscord.data
+        //         },
+        //         {
+        //             where: {
+        //                 user_id: params.user
+        //             }
+        //         }
+        //     );
+
+        //     const payload = {
+        //         "username" : user.username,
+        //         "password" : user.password,
+        //         "type" : user.type
+        //     }
+
+        //     const response = await this.dataProviderService.sendToServerApi(payload, 'add_user_new', 'POST');
+
+        //     if (response.status != 200) {
+        //         return { "error": `error add user, ${response.status}`, "status_code": 400, "status": null }
+        //     }
+
+        //     await this.userModel.update(
+        //         {
+        //             status: 2
+        //         },
+        //         {
+        //             where: {
+        //                 user_id: params.user
+        //             }
+        //         }
+        //     );
+
+        //     return {"success": "ok", "status_code": 200, "error": "", "data": "" };
+        // } catch (err) {
+        //     return { "error": "unknown error", "status_code": 400, "status": null };
+        // }
     }
 
     async denyUser(params: decisionUserDto): Promise<Record<string,string|number>> {

@@ -19,6 +19,8 @@ import { AdminModule } from './admin/admin.module';
 import { BullModule } from '@nestjs/bull';
 import { ProcessQueuesModule } from './process-queues/process-queues.module';
 import { LogsModule } from './logs/logs.module';
+import { CronTasksModule } from './cron/cron.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
@@ -46,6 +48,8 @@ import { LogsModule } from './logs/logs.module';
         AdminModule,
         ProcessQueuesModule,
         LogsModule,
+        CronTasksModule,
+        ScheduleModule.forRoot(),
         SequelizeModule.forRootAsync({
             useFactory: () => ({
                 dialect: 'mysql',

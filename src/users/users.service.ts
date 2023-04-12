@@ -25,7 +25,7 @@ export class UsersService {
     async addUser(params, discordUser): Promise<Record<string,string>> {
         const user = await this.userModel.findOne({
             where: {
-                [Op.or]: [
+                [Op.and]: [
                     {user_id: discordUser.id},
                     {username: params.login}
                 ]
@@ -47,7 +47,7 @@ export class UsersService {
             status: 1,
             user_id: discordUser.id,
             partner: 'gmgame',
-            reg_date: Date.now()
+            reg_date: new Date()
         });
 
         await this.sendWebhook(params, discordUser);

@@ -8,12 +8,16 @@ import { UtilsService } from '../Utils/utils.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
     imports: [
         UsersModule,
         SequelizeModule.forFeature([User, Awards]),
-        NestjsFormDataModule
+        NestjsFormDataModule,
+        BullModule.registerQueue({
+            name: 'users',
+        }),
     ],
     controllers: [ExternalApiController],
     providers: [ExternalApiService, UtilsService, DataProviderService],

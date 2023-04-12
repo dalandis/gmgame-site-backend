@@ -8,6 +8,7 @@ import { Op } from 'sequelize';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../../logs/logs.service';
+import { Regens } from './regens.model';
 
 @Injectable()
 export class UserAdminService {
@@ -20,7 +21,9 @@ export class UserAdminService {
         private territoriesModel: typeof Territories,
         @InjectQueue('users') 
         private usersQueue: Queue,
-        private logsService: LogsService
+        private logsService: LogsService,
+        @InjectModel(Regens)
+        private regensModel: typeof Regens,
     ) {}
 
     async getUser(params: getUserDto): Promise<User[]> {
@@ -61,28 +64,15 @@ export class UserAdminService {
             return { error: true, message: 'Пользователь не найден' };
         }
 
-        const job = await this.usersQueue.getJob(user.user_id);
+        const job = await this.usersQueue.getJob(`${user.user_id}-${params.action}`);
 
         if (job && job.data.action === `${params.action}-user`) {
             return {error: true,  message: 'Уже есть такой таск'};
         }
 
         switch (params.action) {
-            case 'delete':
-                this.usersQueue.add(
-                    {
-                        action: `${params.action}-user`,
-                        id: user.user_id,
-                        username: user.username,
-                        manager: manager.id,
-                        managerName: manager.localuser.username
-                    },
-                    {
-                        jobId: user.user_id,
-                        removeOnComplete: true
-                    }
-                );
-                return { result: true, message: 'Задача добавлена в очередь' };
+            case null:
+                return { error: true, message: 'Неизвестное действие' };
             case 'decline':
                 this.userModel.update(
                     {
@@ -96,7 +86,20 @@ export class UserAdminService {
                 );
                 return { result: true, message: 'Пользователь отклонен' };
             case 'default':
-                return { error: true, message: 'Неизвестное действие' };
+                this.usersQueue.add(
+                    {
+                        action: `${params.action}-user`,
+                        id: user.user_id,
+                        username: user.username,
+                        manager: manager.id,
+                        managerName: manager.localuser.username
+                    },
+                    {
+                        jobId: `${user.user_id}-${params.action}`,
+                        removeOnComplete: true
+                    }
+                );
+                return { result: true, message: 'Задача добавлена в очередь' };
         }
     }
 
@@ -203,5 +206,10 @@ export class UserAdminService {
         );
 
         return { result: true, message: 'Территория обновлена' };
+    }
+
+    //getRegens
+    async getRegens(): Promise<any> {
+        return this.regensModel.findAll();
     }
 }

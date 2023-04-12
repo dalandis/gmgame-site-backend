@@ -104,4 +104,19 @@ export class UserAdminController {
         res.send(JSON.stringify(response));
     }
 
+    // get_regens
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/get_regens')
+    async getRegens(@Request() req, @Response() res): Promise<string> {
+        const response = await this.userAdminService.getRegens();
+
+        if (!response) {
+            res.send(JSON.stringify({error: 'Нет регенов'}));
+            return;
+        }
+
+        res.send(JSON.stringify(response));
+    }
+
 }
