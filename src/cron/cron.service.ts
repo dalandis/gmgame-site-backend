@@ -55,8 +55,6 @@ export class CronTasksService {
             );
         }
 
-        return
-
         const usersOutDiscord = await this.userModel.findAll({
             where: {
                 [Op.and]: [

@@ -1,6 +1,6 @@
 import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { UserAdminService } from './users.service';
-import { getUserDto, actionUserDto, markersDto, logsDto, markersUpdateDto, terrUpdateDto } from '../../validator/admin/users-admin';
+import { getUserDto, actionUserDto, markersDto, logsDto, markersUpdateDto, terrUpdateDto, updateUserDto, regenActionDto } from '../../validator/admin/users-admin';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { RoleGuard } from '../../auth/roles/api-roles';
 
@@ -115,6 +115,26 @@ export class UserAdminController {
             res.send(JSON.stringify({error: 'Нет регенов'}));
             return;
         }
+
+        res.send(JSON.stringify(response));
+    }
+
+    //update_user
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/update_user')
+    async updateUser(@Request() req, @Response() res, @Body() body: updateUserDto): Promise<void> {
+        const response = await this.userAdminService.updateUser(body, req.user);
+
+        res.send(JSON.stringify(response));
+    }
+
+    //regen_action
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/regen_action')
+    async regenAction(@Request() req, @Response() res, @Body() body: regenActionDto): Promise<void> {
+        const response = await this.userAdminService.regenAction(body, req.user);
 
         res.send(JSON.stringify(response));
     }

@@ -9,18 +9,20 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { BullModule } from '@nestjs/bull';
+import { LogsService } from '../logs/logs.service';
+import { Logs } from '../logs/logs.model';
 
 @Module({
     imports: [
         UsersModule,
-        SequelizeModule.forFeature([User, Awards]),
+        SequelizeModule.forFeature([User, Awards, Logs]),
         NestjsFormDataModule,
         BullModule.registerQueue({
             name: 'users',
         }),
     ],
     controllers: [ExternalApiController],
-    providers: [ExternalApiService, UtilsService, DataProviderService],
+    providers: [ExternalApiService, UtilsService, DataProviderService, LogsService],
 })
 
 export class ExternalApiModule {}

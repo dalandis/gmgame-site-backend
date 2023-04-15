@@ -1,4 +1,4 @@
-import {IsInt, IsNotEmpty, IsOptional, IsString, isString} from 'class-validator';
+import {IsDate, IsInt, IsNotEmpty, IsOptional, IsString, isString} from 'class-validator';
 
 export class getUserDto {
     @IsNotEmpty()
@@ -86,4 +86,35 @@ export class terrUpdateDto {
     @IsOptional()
     @IsInt()
     zStop?: number;
+}
+
+export class updateUserDto {
+    @IsNotEmpty()
+    @IsString()
+    id: string;
+
+    @IsOptional()
+    immun?: boolean;
+
+    @IsOptional()
+    @IsString()
+    partner?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+
+    @IsOptional()
+    @IsDate()
+    expiration_date?: Date;
+}
+
+export class regenActionDto {
+    @IsNotEmpty()
+    @IsString()
+    user_id: string;
+
+    @IsNotEmpty()
+    @IsString()
+    action: string;
 }

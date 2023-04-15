@@ -64,3 +64,13 @@ export class decisionUserDto {
     @IsNumberString()
     user: string
 }
+
+export class eventUserDto {
+    @IsNotEmpty()
+    @IsNumberString()
+    user_id: string
+
+    @IsNotEmpty()
+    @IsString()
+    event: string
+}

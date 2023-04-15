@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createUserDto, checkUserDto, decisionUserDto } from '../validator/external-api/create-user';
+import { createUserDto, checkUserDto, decisionUserDto, eventUserDto } from '../validator/external-api/create-user';
 import { ConfigModule } from '@nestjs/config';
 import {UsersService} from '../users/users.service';
 import { User } from '../users/users.model';
@@ -11,6 +11,7 @@ import { DataProviderService } from '../data-provider/data-provider.service';
 import * as crypto from 'crypto';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { LogsService } from '../logs/logs.service';
 
 ConfigModule.forRoot({
     envFilePath: '.env.api'
@@ -35,6 +36,7 @@ export class ExternalApiService {
         private readonly dataProviderService: DataProviderService,
         @InjectQueue('users') 
         private usersQueue: Queue,
+        private readonly logsService: LogsService
     ) {}
 
     async createUser(params: createUserDto, username: string): Promise<Record<string,string|number>> {
@@ -198,6 +200,90 @@ export class ExternalApiService {
         // } catch (err) {
         //     return { "error": "unknown error", "status_code": 400, "status": null };
         // }
+    }
+
+    async eventUser(params: eventUserDto): Promise<Record<string,string|number>> {
+        const user = await this.userModel.findOne({
+            where: {
+                user_id: params.user_id
+            },
+        });
+
+        await this.logsService.logger(
+            JSON.stringify({action: `${params.event}-discord`}),
+            `${params.event}-discord`,
+            params.user_id,
+            'bot',
+            'bot'
+        ).catch(err => console.log(err));
+
+        if (!user?.user_id && params.event === 'join') {
+            this.userModel.create({
+                user_id: params.user_id,
+                status: 6,
+                tag: '{}',
+                age: 0,
+                from_about: '',
+                you_about: '',
+                is_discord: true,
+                type: 0
+            });
+
+            return {};
+        }
+
+        if (!user?.username) {
+            return {};
+        }
+
+        let toUpadate: {is_discord?: boolean, expiration_date?: Date} = {};
+
+        if (params.event === 'join') {
+            if (user.is_discord) {
+                return {};
+            }
+
+            toUpadate = {is_discord: true};
+
+            const expirationDate = user.expiration_date ? new Date(user.expiration_date) : new Date(user.createdAt);
+            expirationDate.setDate(expirationDate.getDate() + 46);
+
+            if (!user.expiration_date && expirationDate > user.expiration_date) {
+                toUpadate = {...toUpadate, ...{expiration_date: expirationDate}};
+            }
+        }
+
+        if (params.event === 'leave') {
+            if (!user.is_discord) {
+                return {};
+            }
+
+            toUpadate = {is_discord: false};
+
+            const expirationDate = new Date();
+
+            if (!user.expiration_date && expirationDate < user.expiration_date) {
+                toUpadate = {...toUpadate, ...{expiration_date: expirationDate}};
+            }
+        }
+        console.log(toUpadate)
+        if (toUpadate.expiration_date) {
+            this.logsService.logger(
+                `Change expiration date for reason ${params.event} with ${user.expiration_date || user.createdAt} to ${toUpadate.expiration_date}`, 
+                'change-expiration-date', user.user_id, 'bot', 'bot'
+            ).catch(err => console.log(err));
+        }
+
+        this.userModel.update(
+            toUpadate,
+            {
+                where: {
+                    user_id: params.user_id
+                }
+            }
+        ).catch(err => console.log(err));
+
+        return {};
     }
 
     async denyUser(params: decisionUserDto): Promise<Record<string,string|number>> {

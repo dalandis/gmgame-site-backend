@@ -1,6 +1,6 @@
 import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
 import { ExternalApiService } from './external-api.service';
-import { createUserDto, getStatusrDto, checkUserDto, decisionUserDto } from '../validator/external-api/create-user';
+import { createUserDto, getStatusrDto, checkUserDto, decisionUserDto, eventUserDto } from '../validator/external-api/create-user';
 import {LoginGuardBearer} from '../auth/guards/login.guard';
 import {RoleGuard} from '../auth/roles/api-roles';
 import { FormDataRequest } from 'nestjs-form-data';
@@ -85,6 +85,21 @@ export class ExternalApiController {
     @FormDataRequest()
     async voteHandler(@Request() req, @Response() res, @Body() body): Promise<any> {
         const response = await this.externalApiService.voteHandler(body);
+
+        if (response.error) {
+            res.status(HttpStatus.BAD_REQUEST).json(response);
+            return;
+        }
+
+        res.send(response.success);
+    }
+
+    //event_user
+    @SetMetadata('role', 'bot')
+    @UseGuards(LoginGuardBearer, RoleGuard)
+    @Post('/event_user')
+    async eventUser(@Request() req, @Response() res, @Body() body: eventUserDto): Promise<any> {
+        const response = await this.externalApiService.eventUser(body);
 
         if (response.error) {
             res.status(HttpStatus.BAD_REQUEST).json(response);

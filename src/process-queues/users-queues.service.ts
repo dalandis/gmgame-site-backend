@@ -54,7 +54,6 @@ export class UsersConsumer {
 
             // await this.deleteUser(job.data.id);
         } else if (job.data.action === 'suspend-user') {
-            throw new Error('User not found');
             await this.deleteFromWl(job.data.username);
             await job.progress(30);
             await this.changeStatus(job.data.id, 'suspend');
@@ -122,7 +121,7 @@ export class UsersConsumer {
 
         await this.territoriesModel.update(
             {
-                name: literal('CONCAT("(hold) ", name)'),
+                name: literal('CONCAT("[hold] ", name)'),
             },
             {
                 where: {

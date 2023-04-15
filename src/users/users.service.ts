@@ -36,7 +36,21 @@ export class UsersService {
             return {error: 'user exist'};
         }
 
-        await this.userModel.create({ 
+        // await this.userModel.create({ 
+        //     username: params.login,
+        //     password: params.password,
+        //     tag: JSON.stringify(discordUser),
+        //     type: params.type,
+        //     age: params.age,
+        //     from_about: params.from_about,
+        //     you_about: params.you_about,
+        //     status: 1,
+        //     user_id: discordUser.id,
+        //     partner: 'gmgame',
+        //     reg_date: new Date()
+        // });
+        //with upset
+        await this.userModel.upsert({
             username: params.login,
             password: params.password,
             tag: JSON.stringify(discordUser),
@@ -56,18 +70,17 @@ export class UsersService {
     }
 
     private async sendWebhook(params, discordUser) {
-       const data = '```' + `
-            (test)
-            Игровой ник: ${params.login}
-            Аккаунт: ${this.utilsService.getAccountType(params.type)}
-            Возраст: ${params.age}
-            Предыдущие сервера: ${params.servers}
-            Откуда узнали о проекте: ${params.from_about}
-            Интересы в Minecraft: ${params.you_about}
-            Заявка от: ${params.partner}
-            Дискорд: ${this.utilsService.getDiscord(discordUser)}
-            <@${discordUser.id}>
-        ` + '```';
+        const data = '```' + `
+(test)
+Игровой ник: ${params.login}
+Аккаунт: ${this.utilsService.getAccountType(params.type)}
+Возраст: ${params.age}
+Предыдущие сервера: ${params.servers}
+Откуда узнали о проекте: ${params.from_about}
+Интересы в Minecraft: ${params.you_about}
+Заявка от: ${params.partner}
+Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
+<@${discordUser.id}>`;
 
         this.dataProviderService.sendDiscordWebHook(data, 'applicant');
     }
