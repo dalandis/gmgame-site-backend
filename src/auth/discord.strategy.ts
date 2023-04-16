@@ -39,7 +39,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
                 attributes: ['username', 'type', 'status']
             });
 
-            profile.role = this.getRole(profile.id, user.status);
+            profile.role = this.getRole(profile.id, user?.status);
 
             if (user) {
                 profile.localuser = user;
@@ -54,7 +54,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
             return 'admin';
         }
 
-        if (status === 2) {
+        if (status && status === 2) {
             return 'player';
         }
 

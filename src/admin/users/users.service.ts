@@ -27,6 +27,7 @@ export class UserAdminService {
     ) {}
 
     async getUser(params: getUserDto): Promise<User[]> {
+        // check params.ser
         const user = await this.userModel.findAll({
             include: [
                 {model: this.markersModel},
@@ -35,21 +36,33 @@ export class UserAdminService {
             where: {
                 [Op.or]: [
                     {user_id: params.searchParam},
-                    {username: {[Op.like]: params.searchParam}}
+                    {username: {[Op.like]: `%${params.searchParam}%`}}
                 ]
             },
-            attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note']
+            attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note', 'expiration_date']
         });
 
         return user;
     }
 
     async getMarkers(): Promise<Markers[]> {
-        return this.markersModel.findAll();
+        return this.markersModel.findAll({
+            include: [{
+                model: this.userModel,
+                attributes: []
+            }],
+            attributes: ['id', 'id_type', 'x', 'y', 'z', 'name', 'description', 'user', 'server', 'flag', [col('player.username'), 'username']]
+        });
     }
 
     async getTerritories(): Promise<Territories[]> {
-        return this.territoriesModel.findAll();
+        return this.territoriesModel.findAll({
+            include: [{
+                model: this.userModel,
+                attributes: []
+            }],
+            attributes: ['id', 'xStart', 'zStart', 'xStop', 'zStop', 'name', 'user', 'world', [col('player.username'), 'username']]
+        });
     }
 
     async actionUser(params: actionUserDto, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
