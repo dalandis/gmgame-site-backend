@@ -229,7 +229,9 @@ export class UserAdminService {
                     status: 'new'
                 }
             }
-        );
+        ).catch((err) => {
+            return {error: true,  message: err};
+        });
     }
 
     //updateUser
