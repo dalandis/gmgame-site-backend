@@ -60,6 +60,7 @@ export class UsersConsumer {
         } else if (job.data.action === 'ban-user') {
             await this.deleteFromWl(job.data.username);
             await job.progress(50);
+            await this.addManualProcess(job);
 
             await this.changeStatus(job.data.id, 'ban');
         } else if (job.data.action === 'resume-user' || job.data.action === 'unban-user') {

@@ -98,7 +98,7 @@ export class UserAdminService {
                     }
                 );
                 return { result: true, message: 'Пользователь отклонен' };
-            case 'default':
+            default:
                 this.usersQueue.add(
                     {
                         action: `${params.action}-user`,
