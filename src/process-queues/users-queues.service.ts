@@ -37,22 +37,19 @@ export class UsersConsumer {
     @Process()
     async userDelete(job: Job<IJob>) {
         if (job.data.action === 'delete-user') {
-            // throw new Error('User not found');
-            // job.moveToFailed(new Error('User not found'));
-            console.log('jfkgwekhfgwekhfjvgkhwjfgwevfjhfgvwefjhkewfvwefkjhwevwekjh')
-            // await this.deleteTerritories(job.data.id);
-            // await job.progress(20);
+            await this.deleteTerritories(job.data.id);
+            await job.progress(20);
 
-            // await this.deleteMarkers(job.data.id);
-            // await job.progress(40);
+            await this.deleteMarkers(job.data.id);
+            await job.progress(40);
 
-            // await this.deleteAwards(job.data.id);
-            // await job.progress(60);
+            await this.deleteAwards(job.data.id);
+            await job.progress(60);
 
-            // await this.deleteFromWl(job.data.username);
-            // await job.progress(80);
+            await this.deleteFromWl(job.data.username);
+            await job.progress(80);
 
-            // await this.deleteUser(job.data.id);
+            await this.deleteUser(job.data.id);
         } else if (job.data.action === 'suspend-user') {
             await this.deleteFromWl(job.data.username);
             await job.progress(30);
