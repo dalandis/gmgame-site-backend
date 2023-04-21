@@ -105,7 +105,7 @@ export class UserAdminService {
                         id: user.user_id,
                         username: user.username,
                         manager: manager.id,
-                        managerName: manager.localuser.username
+                        managerName: manager.discordUser?.localuser?.username || manager.discordUser?.username
                     },
                     {
                         jobId: `${user.user_id}-${params.action}`,
