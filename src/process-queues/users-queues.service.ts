@@ -65,6 +65,7 @@ export class UsersConsumer {
             await this.changeStatus(job.data.id, 'ban');
         } else if (job.data.action === 'resume-user' || job.data.action === 'unban-user') {
             await this.updateUser(job.data.id);
+            await this.delRegen(job.data.id);
             await job.progress(30);
             await this.addToWl(job.data.username);
             await job.progress(60);
@@ -89,6 +90,22 @@ export class UsersConsumer {
         let log = JSON.stringify(job.data);
 
         await this.logsService.logger(log, job.data.action , job.data.id, job.data.managerName, job.data.manager);
+    }
+
+    async delRegen(id: string): Promise<void> {
+        const user = await this.regensModel.findOne({
+            where: {
+                user_id: id,
+            },
+        });
+
+        if (user) {
+            await this.regensModel.destroy({
+                where: {
+                    user_id: id,
+                },
+            });
+        }
     }
 
     async addManualProcess(job: Job<IJob>): Promise<void> {
