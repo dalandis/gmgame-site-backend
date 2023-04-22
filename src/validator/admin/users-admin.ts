@@ -105,7 +105,7 @@ export class updateUserDto {
     note?: string;
 
     @IsOptional()
-    @IsDate()
+    @IsString()
     expiration_date?: Date;
 }
 

@@ -261,7 +261,7 @@ export class UserAdminService {
             this.logsService.logger(
                 JSON.stringify({action: 'change-expiration-date', data: {expirationDate: user.expiration_date, newExpirationDate: body.expiration_date}}),
                 'update-user',
-                user.user_id,
+                body.id,
                 manager.localuser.username,
                 manager.id
             );
