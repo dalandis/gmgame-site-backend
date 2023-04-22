@@ -85,14 +85,10 @@ export class UsersConsumer {
     }
 
     @OnQueueCompleted()
-    onActive(job: Job) {
+    async onActive(job: Job, result: any) {
         let log = JSON.stringify(job.data);
-        
-        // if (job.data.reason) {
-        //     log += `; reason: ${job.data.reason}`;
-        // }
 
-        this.logsService.logger(log, job.data.action , job.data.id, job.data.managerName, job.data.manager);
+        await this.logsService.logger(log, job.data.action , job.data.id, job.data.managerName, job.data.manager);
     }
 
     async addManualProcess(job: Job<IJob>): Promise<void> {
@@ -130,13 +126,15 @@ export class UsersConsumer {
     }
 
     async updateUser(id: string): Promise<void> {
-        const isDiscord = await this.dataProviderService.sendToBot({user: id}, 'check_user_define', 'POST');
+        const response = await this.dataProviderService.sendToBot({user: id}, 'check_user_define', 'POST');
 
-        const days = isDiscord.data ? 60 : 14;
+        const isDiscord = response.data?.data;
+
+        const days = isDiscord ? 60 : 14;
         const date = new Date();
         date.setDate(date.getDate() + days);
 
-        this.userModel.update(
+        await this.userModel.update(
             {
                 expiration_date: date,
                 is_discord: isDiscord.data
@@ -146,7 +144,9 @@ export class UsersConsumer {
                     user_id: id
                 }
             }
-        );
+        ).catch((err) => {
+            console.log(err);
+        });
     }
 
     async addUserToServer(id: string): Promise<void> {

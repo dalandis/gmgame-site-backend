@@ -70,13 +70,16 @@ export class CronTasksConsumer {
 
             const diffDays = this.getDiffDays(lastLoginDate, expirationDate);
 
+            const discordResponse = await this.dataProviderService.sendToBot({user: job.data.id}, 'check_user_define', 'POST');
+
             if (diffDays < 60) {
                 const newExpirationDate = new Date(lastLoginDate);
                 newExpirationDate.setDate(newExpirationDate.getDate() + 60);
 
                 this.userModel.update(
                     {
-                        expiration_date: newExpirationDate
+                        expiration_date: newExpirationDate,
+                        is_discord: discordResponse.data.data
                     },
                     {
                         where: {

@@ -105,7 +105,7 @@ export class UserAdminService {
                         id: user.user_id,
                         username: user.username,
                         manager: manager.id,
-                        managerName: manager.discordUser?.localuser?.username || manager.discordUser?.username
+                        managerName: manager.localuser?.username || manager.username
                     },
                     {
                         jobId: `${user.user_id}-${params.action}`,
@@ -147,7 +147,6 @@ export class UserAdminService {
     }
 
     async updateMarker(body: markersUpdateDto, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
-        console.log(body)
         const marker = await this.markersModel.findOne({
             where: {
                 id: body.id
@@ -313,7 +312,7 @@ export class UserAdminService {
             JSON.stringify({action: 'regen-complet', data: {action: body.action}}),
             'regen-user',
             body.user_id,
-            manager.localuser.username,
+            manager.discordUser?.username || manager.username,
             manager.id
         );
 
