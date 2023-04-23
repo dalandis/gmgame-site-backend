@@ -14,10 +14,14 @@ export class CronTasksService {
         @InjectQueue('cron-tasks') 
         private cronTasksQueue: Queue,
     ) {}
-    @Cron('10 * * * * *', {
-        disabled: true,
+    @Cron('01 01 00 * * *', {
+        disabled: false,
     })
     async handleCron() {
+        if (process.env.NODE_ENV === 'dev') {
+            return;
+        }
+
         const date = new Date();
 
         const usersInDiscord = await this.userModel.findAll({
