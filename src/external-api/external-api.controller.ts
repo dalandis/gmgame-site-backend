@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata } from '@nestjs/common';
+import { Controller, UseGuards, Request, Response, Post, Body, HttpStatus, SetMetadata, Get } from '@nestjs/common';
 import { ExternalApiService } from './external-api.service';
 import { createUserDto, getStatusrDto, checkUserDto, decisionUserDto, eventUserDto } from '../validator/external-api/create-user';
 import {LoginGuardBearer} from '../auth/guards/login.guard';
@@ -94,7 +94,6 @@ export class ExternalApiController {
         res.send(response.success);
     }
 
-    //event_user
     @SetMetadata('role', 'bot')
     @UseGuards(LoginGuardBearer, RoleGuard)
     @Post('/event_user')
@@ -107,6 +106,13 @@ export class ExternalApiController {
         }
 
         res.send(response.success);
+    }
+
+    @Get('/locations/:world')
+    async getLocations(@Request() req, @Response() res): Promise<any> {
+        const territories = await this.externalApiService.getLocations(req.params.world);
+
+        res.send(JSON.stringify(territories));
     }
 }
 

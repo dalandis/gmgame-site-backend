@@ -11,11 +11,12 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
 import { BullModule } from '@nestjs/bull';
 import { LogsService } from '../logs/logs.service';
 import { Logs } from '../logs/logs.model';
+import { Territories } from '../territories/territories.model';
 
 @Module({
     imports: [
         UsersModule,
-        SequelizeModule.forFeature([User, Awards, Logs]),
+        SequelizeModule.forFeature([User, Awards, Logs, Territories]),
         NestjsFormDataModule,
         BullModule.registerQueue({
             name: 'users',

@@ -12,6 +12,7 @@ import * as crypto from 'crypto';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../logs/logs.service';
+import { Territories } from '../territories/territories.model';
 
 ConfigModule.forRoot({
     envFilePath: '.env.api'
@@ -22,6 +23,21 @@ interface ISignData{
     timestamp: string,
     username: string,
     signature: string
+}
+
+interface Location {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+}
+
+interface Terr {
+    territory: string;
+    guild: string;
+    acquired: string;
+    attacker: null | string;
+    location: Location;
 }
 
 @Injectable()
@@ -36,7 +52,9 @@ export class ExternalApiService {
         private readonly dataProviderService: DataProviderService,
         @InjectQueue('users') 
         private usersQueue: Queue,
-        private readonly logsService: LogsService
+        private readonly logsService: LogsService,
+        @InjectModel(Territories)
+        private territoriesModel: typeof Territories,
     ) {}
 
     async createUser(params: createUserDto, username: string): Promise<Record<string,string|number>> {
@@ -380,5 +398,36 @@ export class ExternalApiService {
         }
 
         return '';
+    }
+
+    async getLocations(world): Promise<{success?: string, status_code: number, error: string, territories?: {[key: string]: Terr }, status?: boolean, world?: string}> {
+        try{
+            const locations = await this.territoriesModel.findAll({
+                where: {
+                    world: world
+                }
+            });
+
+            let terrs: { [key: string]: Terr } = {};
+
+            for (let marker of locations) {
+                terrs[marker.name] = {
+                    territory: `'${marker.name}'`,
+                    guild: "",
+                    acquired: "2021-05-05 02:24:09",
+                    attacker: null,
+                    location: {
+                        startX: marker.xStart,
+                        startY: marker.zStart,
+                        endX: marker.xStop,
+                        endY: marker.zStop
+                    }
+                };
+            }
+
+            return {"success": "ok", "status_code": 200, "error": "", "territories": terrs, "world": world };
+        } catch (err) {
+            return { "error": "unknown error", "status_code": 400, "status": null };
+        }
     }
 }
