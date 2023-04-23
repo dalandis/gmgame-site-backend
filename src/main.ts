@@ -6,6 +6,7 @@ const cookieSession = require('cookie-session')
 const Queue = require('bull')
 const { createBullBoard } = require('bull-board')
 const { BullAdapter } = require('bull-board/bullAdapter')
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -26,7 +27,12 @@ async function bootstrap() {
         new BullAdapter(new Queue('cron-tasks')),
       ])
     
-    app.use('/admin/queues', router);
+    const protect = basicAuth({
+        users: { [process.env.BASIC_AUTH_USERNAME]: process.env.BASIC_AUTH_PASSWORD },
+        challenge: true
+    })
+    
+    app.use('/admin/queues', protect, router);
     
     await app.listen(3001);
 }
