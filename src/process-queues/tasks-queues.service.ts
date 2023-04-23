@@ -64,7 +64,7 @@ export class CronTasksConsumer {
                 throw new Error(result.data.error);
             }
 
-            const lastLoginDate = new Date(result.data.lastlogin);
+            const lastLoginDate = new Date(result.data.lastlogin || Date.now());
 
             const expirationDate = job.data.expirationDate ? new Date(job.data.expirationDate) : new Date();
 
@@ -110,20 +110,24 @@ export class CronTasksConsumer {
             }
         }
         if (job.data.action === 'suspend-discord') {
-            this.usersQueue.add(
-                {
-                    action: 'suspend-user',
-                    id: job.data.id,
-                    username: job.data.username,
-                    manager: job.data.manager,
-                    managerName: job.data.managerName,
-                    reason: 'Not in discord',
-                },
-                {
-                    jobId: `${job.data.id}-suspend`,
-                    removeOnComplete: true
-                }
-            );
+            const discordResponse = await this.dataProviderService.sendToBot({user: job.data.id}, 'check_user_define', 'POST');
+
+            if (discordResponse.data.data === false) {
+                this.usersQueue.add(
+                    {
+                        action: 'suspend-user',
+                        id: job.data.id,
+                        username: job.data.username,
+                        manager: job.data.manager,
+                        managerName: job.data.managerName,
+                        reason: 'Not in discord',
+                    },
+                    {
+                        jobId: `${job.data.id}-suspend`,
+                        removeOnComplete: true
+                    }
+                );
+            }
         }
     }
 
