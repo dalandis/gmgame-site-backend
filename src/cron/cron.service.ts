@@ -14,8 +14,8 @@ export class CronTasksService {
         @InjectQueue('cron-tasks') 
         private cronTasksQueue: Queue,
     ) {}
-    @Cron('01 01 00 * * *', {
-        disabled: true,
+    @Cron('00 01 00 * * *', {
+        disabled: false,
         timeZone: 'Europe/Moscow'
     })
     async handleCron() {
