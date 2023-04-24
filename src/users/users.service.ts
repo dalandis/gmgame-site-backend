@@ -50,6 +50,15 @@ export class UsersService {
         //     reg_date: new Date()
         // });
         //with upset
+
+        let discordResponse = null;
+
+        try {
+            discordResponse = await this.dataProviderService.sendToBot({user: discordUser.id}, 'check_user_define', 'POST');
+        } catch (error) {
+            console.log(error);
+        }
+
         await this.userModel.upsert({
             username: params.login,
             password: params.password,
@@ -61,7 +70,9 @@ export class UsersService {
             status: 1,
             user_id: discordUser.id,
             partner: 'gmgame',
-            reg_date: new Date()
+            reg_date: new Date(),
+            expiration_date: new Date(),
+            is_discord: discordResponse.data?.data || false
         });
 
         await this.sendWebhook(params, discordUser);
@@ -71,7 +82,6 @@ export class UsersService {
 
     private async sendWebhook(params, discordUser) {
         const data = '```' + `
-(test)
 Игровой ник: ${params.login}
 Аккаунт: ${this.utilsService.getAccountType(params.type)}
 Возраст: ${params.age}

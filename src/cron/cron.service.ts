@@ -15,9 +15,13 @@ export class CronTasksService {
         private cronTasksQueue: Queue,
     ) {}
     @Cron('01 01 00 * * *', {
-        disabled: false,
+        disabled: true,
+        timeZone: 'Europe/Moscow'
     })
     async handleCron() {
+        if (process.env.pm_id !== '7') {
+            return;
+        }
         if (process.env.NODE_ENV === 'dev') {
             return;
         }
