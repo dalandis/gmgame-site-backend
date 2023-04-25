@@ -157,7 +157,7 @@ export class UsersConsumer {
 
         await this.territoriesModel.update(
             {
-                name: literal('REPLACE(REPLACE(name, "[hold]", ""), [repopulate], "")'),
+                name: literal('REPLACE(REPLACE(name, "[hold]", ""), "[repopulate]", "")'),
             },
             {
                 where: {
