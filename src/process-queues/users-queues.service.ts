@@ -66,6 +66,7 @@ export class UsersConsumer {
         } else if (job.data.action === 'resume-user' || job.data.action === 'unban-user') {
             await this.updateUser(job.data.id);
             await this.delRegen(job.data.id);
+            await this.resumeMarkers(job.data.id);
             await job.progress(30);
             await this.addToWl(job.data.username);
             await job.progress(60);
@@ -133,6 +134,30 @@ export class UsersConsumer {
         await this.territoriesModel.update(
             {
                 name: literal('CONCAT("[hold] ", name)'),
+            },
+            {
+                where: {
+                    user: id,
+                },
+            }
+        );
+    }
+
+    async resumeMarkers(id: string): Promise<void> {
+        await this.markersModel.update(
+            {
+                flag: 1,
+            },
+            {
+                where: {
+                    user: id,
+                },
+            }
+        );
+
+        await this.territoriesModel.update(
+            {
+                name: literal('REPLACE(REPLACE(name, "[hold]", ""), [repopulate], "")'),
             },
             {
                 where: {
