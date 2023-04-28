@@ -5,7 +5,7 @@ import {UsersService} from '../users/users.service';
 import { User } from '../users/users.model';
 import { Awards } from '../awards/awards.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { Op, col } from 'sequelize';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import * as crypto from 'crypto';
@@ -38,6 +38,7 @@ interface Terr {
     acquired: string;
     attacker: null | string;
     location: Location;
+    username: string;
 }
 
 @Injectable()
@@ -403,9 +404,22 @@ export class ExternalApiService {
     async getLocations(world): Promise<{success?: string, status_code: number, error: string, territories?: {[key: string]: Terr }, status?: boolean, world?: string}> {
         try{
             const locations = await this.territoriesModel.findAll({
+                include: [{
+                    model: this.userModel,
+                    attributes: []
+                }],
                 where: {
                     world: world
-                }
+                },
+                attributes: [
+                    'name',
+                    'xStart',
+                    'zStart',
+                    'xStop',
+                    'zStop',
+                    [col('player.username'), 'username']
+                ],
+                raw: true
             });
 
             let terrs: { [key: string]: Terr } = {};
@@ -413,6 +427,7 @@ export class ExternalApiService {
             for (let marker of locations) {
                 terrs[marker.name] = {
                     territory: `'${marker.name}'`,
+                    username: marker.username,
                     guild: "",
                     acquired: "2021-05-05 02:24:09",
                     attacker: null,

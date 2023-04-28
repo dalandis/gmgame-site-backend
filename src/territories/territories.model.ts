@@ -29,4 +29,6 @@ export class Territories extends Model<Territories> {
 
     @HasOne(() => User, {sourceKey: 'user', foreignKey: 'user_id'})
     player: User;
+    
+    username: string;
 }
