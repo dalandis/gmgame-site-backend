@@ -30,6 +30,12 @@ export class TerritoriesController {
     async getTerr(@Request() req, @Response() res, @Param() params): Promise<any> {
         const terr = await this.territoriesService.getTerr(req.user.id, params.id_terr);
 
+        if (!terr) {
+            res.status(HttpStatus.NO_CONTENT).json({
+                message: 'Territory not found'
+            });
+            return;
+        }
         res.send({
             terr: terr,
             world_name: await this.utilsService.getWorldName(terr.world || '')

@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 
 export class territoriesDto {
     @IsNotEmpty()
-    @Matches('^[a-zA-Z]+$')
+    @Matches('^[a-zA-Z-]+$')
     server: string;
 
     @IsNotEmpty()
