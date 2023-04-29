@@ -401,7 +401,7 @@ export class ExternalApiService {
         return '';
     }
 
-    async getLocations(world): Promise<{success?: string, status_code: number, error: string, territories?: {[key: string]: Terr }, status?: boolean, world?: string}> {
+    async getLocations(world, status): Promise<{success?: string, status_code: number, error: string, territories?: {[key: string]: Terr }, status?: boolean, world?: string}> {
         try{
             const locations = await this.territoriesModel.findAll({
                 include: [{
@@ -409,7 +409,8 @@ export class ExternalApiService {
                     attributes: []
                 }],
                 where: {
-                    world: world
+                    world: world,
+                    status: status
                 },
                 attributes: [
                     'name',
@@ -440,7 +441,7 @@ export class ExternalApiService {
                 };
             }
 
-            return {"success": "ok", "status_code": 200, "error": "", "territories": terrs, "world": world };
+            return {"success": "ok", "status_code": 200, "error": "", "territories": terrs, "world": world, "status": status };
         } catch (err) {
             return { "error": "unknown error", "status_code": 400, "status": null };
         }

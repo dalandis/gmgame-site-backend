@@ -134,6 +134,7 @@ export class UsersConsumer {
         await this.territoriesModel.update(
             {
                 name: literal('CONCAT("[hold] ", name)'),
+                status: 'hold',
             },
             {
                 where: {
@@ -158,6 +159,7 @@ export class UsersConsumer {
         await this.territoriesModel.update(
             {
                 name: literal('REPLACE(REPLACE(name, "[hold]", ""), "[repopulate]", "")'),
+                status: 'active',
             },
             {
                 where: {

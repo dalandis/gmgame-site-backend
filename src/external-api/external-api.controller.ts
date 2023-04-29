@@ -108,9 +108,9 @@ export class ExternalApiController {
         res.send(response.success);
     }
 
-    @Get('/locations/:world')
+    @Get('/locations/:world/:status')
     async getLocations(@Request() req, @Response() res): Promise<any> {
-        const territories = await this.externalApiService.getLocations(req.params.world);
+        const territories = await this.externalApiService.getLocations(req.params.world, req.params.status);
 
         res.send(JSON.stringify(territories));
     }

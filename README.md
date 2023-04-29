@@ -77,7 +77,7 @@ $ npm run start:prod
 
 ```bash
 npx sequelize-cli migration:create --name NAME
-npx sequelize-cli db:migrate --url 'mysql://dbname:password@127.0.0.1/dbuser'
+npx sequelize-cli db:migrate --url 'mysql://dbname:dbuser@127.0.0.1/password'
 ```
 
 ## License

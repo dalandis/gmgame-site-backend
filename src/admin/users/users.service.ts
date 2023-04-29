@@ -189,8 +189,16 @@ export class UserAdminService {
             where: {
                 id: body.id
             },
-            attributes: ['name', 'world', 'xStart', 'xStop', 'zStart', 'zStop', 'user']
+            attributes: ['name', 'world', 'xStart', 'xStop', 'zStart', 'zStop', 'user', 'status']
         }).then((territory) => {
+            let status = territory.status;
+            if (body.name.includes('[hold]')) {
+                status = 'hold';
+            }
+            if (body.name.includes('[repopulate]')) {
+                status = 'repopulate';
+            }
+
             this.territoriesModel.update(
                 {
                     name: body.name,
@@ -198,7 +206,8 @@ export class UserAdminService {
                     xStart: body.xStart,
                     xStop: body.xStop,
                     zStart: body.zStart,
-                    zStop: body.zStop
+                    zStop: body.zStop,
+                    status: status
                 },
                 {
                     where: {
@@ -287,7 +296,8 @@ export class UserAdminService {
         } else {
             await this.territoriesModel.update(
                 {   
-                    name: fn('replace', col('name'), '[hold]', '[repopulate]')
+                    name: fn('replace', col('name'), '[hold]', '[repopulate]'),
+                    status: 'repopulate'
                 },
                 {
                     where: {

@@ -31,4 +31,7 @@ export class Territories extends Model<Territories> {
     player: User;
     
     username: string;
+
+    @Column({ type: DataType.STRING, allowNull: true })
+    status: string;
 }

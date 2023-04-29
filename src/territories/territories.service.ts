@@ -61,7 +61,8 @@ export class TerritoriesService {
                 xStop: params.stopX,
                 zStart: params.startZ,
                 zStop: params.stopZ,
-                user: user
+                user: user,
+                status: 'active'
             });
 
             return {message: 'terr is add'};
