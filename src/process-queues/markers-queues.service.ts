@@ -10,8 +10,8 @@ interface IJobMarkers{
     type: string;
 }
 
-@Processor('users')
-export class UsersConsumer {
+@Processor('markers')
+export class MarkersConsumer {
     constructor(
         @InjectModel(Markers)
         private markersModel: typeof Markers,
@@ -19,7 +19,7 @@ export class UsersConsumer {
     ) {}
 
     @Process()
-    async userDelete(job: Job<IJobMarkers>) {
+    async markersRefresh(job: Job<IJobMarkers>) {
         const markers = await this.markersModel.findAll({
             where: {
                 server: job.data.serverName
