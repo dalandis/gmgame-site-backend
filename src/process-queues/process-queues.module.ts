@@ -11,6 +11,7 @@ import { LogsService } from '../logs/logs.service';
 import { Logs } from '../logs/logs.model';
 import { CronTasksConsumer } from './tasks-queues.service';
 import { Regens } from '../admin/users/regens.model';
+import { MarkersConsumer } from './markers-queues.service';
 
 @Module({
     imports: [
@@ -28,7 +29,7 @@ import { Regens } from '../admin/users/regens.model';
         )
     ],
     controllers: [],
-    providers: [UsersConsumer, DataProviderService, LogsService, CronTasksConsumer],
+    providers: [UsersConsumer, DataProviderService, LogsService, CronTasksConsumer, MarkersConsumer],
 })
 
 export class ProcessQueuesModule {}
