@@ -32,19 +32,14 @@ export class MarkersController {
             return res.send({});
         }
 
-        const marker = await this.markersService.getMarker(req.user.id, params.id_marker);
-
-        res.send({
-            marker: marker,
-            world_name: await this.utilsService.getWorldName(marker.server || '')
-        });
+        res.send(await this.markersService.getMarker(req.user.id, params.id_marker));  
     }
 
     @SetMetadata('role', 'player')
     @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('/edit_marker')
     async editMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
-        const message = await this.markersService.editMarker(body, req.user.id);
+        const message = await this.markersService.editMarker(body, req.user.id, req.user);
         console.log(message);
         res.send(JSON.stringify(message));
     }
@@ -53,7 +48,7 @@ export class MarkersController {
     @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('add_marker')
     async addMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
-        const message = await this.markersService.addMarker(body, req.user.id);
+        const message = await this.markersService.addMarker(body, req.user.id, req.user);
         console.log(message);
         res.send(JSON.stringify(message));
     }
@@ -62,7 +57,7 @@ export class MarkersController {
     @UseGuards(AuthenticatedGuard, RoleGuard)
     @Post('delete_marker')
     async deleteMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
-        const message = await this.markersService.deleteMarker(body, req.user.id);
+        const message = await this.markersService.deleteMarker(body, req.user.id, req.user);
         console.log(message);
         res.send(JSON.stringify(message));
     }

@@ -5,13 +5,19 @@ import { Markers } from './markers.model';
 import { MarkersService } from './markers.service';
 import { UtilsService } from '../Utils/utils.service';
 import { User } from '../users/users.model';
+import { BullModule } from '@nestjs/bull';
+import { LogsService } from '../logs/logs.service';
+import { Logs } from '../logs/logs.model';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([Markers, User])
+        SequelizeModule.forFeature([Markers, User, Logs]),
+        BullModule.registerQueue({
+            name: 'markers',
+        }),
     ],
     controllers: [MarkersController],
-    providers: [MarkersService, UtilsService],
+    providers: [MarkersService, UtilsService, LogsService],
 })
 
 export class MarkersModule {}

@@ -1,16 +1,25 @@
 import { Injectable } from '@nestjs/common';
 
+export interface IWorldType {
+    worldName: string;
+    layer: string;
+}
+
 @Injectable()
 export class UtilsService {
 
-    public async getWorldName(world: string): Promise<string> {
+    public getWorldName(world: string): IWorldType {
         switch(world) {
             case 'gmgame':
-                return 'GMGameWorld - overworld';
+                return {worldName: 'GMGameWorld - overworld', layer: 'over'};
             case 'farm':
-                return 'FarmWorld - overworld';
+                return {worldName: 'FarmWorld - overworld', layer: 'over'};
+            case 'nether-farm':
+                return {worldName: 'FarmWorld-Nether - nether', layer: 'nether'};
+            case 'end-farm':
+                return {worldName: 'FarmWorld-End - end', layer: 'end'};
             default:
-                return 'GMGameWorld - overworld';
+                return {worldName: 'GMGameWorld - overworld', layer: 'over'};
         }
     }
 
@@ -46,5 +55,19 @@ export class UtilsService {
         }
 
         return discordUser.id;
+    }
+
+    public getWorldType(type: string): IWorldType {
+        if (type=='basePlayers' || type=='city' || type=='shopping_centers') {
+            return {worldName: 'GMGameWorld - overworld', layer: 'over'};
+        }
+
+        if (type=='turquoise' || type=='orange' || type=='lime' || type=='pink' || type=='farm') {
+            return {worldName: 'GMGameWorld-Nether - nether', layer: 'nether'};
+        }
+
+        if (type=='end_portals' || type=='pixel_arts') {
+            return {worldName: 'GMGameWorld-TheEnd - end', layer: 'the_end'};
+        }
     }
 }

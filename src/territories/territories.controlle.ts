@@ -38,7 +38,7 @@ export class TerritoriesController {
         }
         res.send({
             terr: terr,
-            world_name: await this.utilsService.getWorldName(terr.world || '')
+            world: this.utilsService.getWorldName(terr.world || '')
         });
     }
 

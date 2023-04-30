@@ -25,7 +25,7 @@ export class DataProviderService {
         });
     }
 
-    public async sendToServerApi(payload: Record<string,string|number>, url: string, method: string): Promise<AxiosResponse> {
+    public async sendToServerApi<T>(payload: T, url: string, method: string): Promise<AxiosResponse> {
         return axios.request({
             data: JSON.stringify(payload),
             method: method,

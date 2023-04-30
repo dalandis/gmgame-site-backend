@@ -24,10 +24,11 @@ export class UserAdminService {
         private logsService: LogsService,
         @InjectModel(Regens)
         private regensModel: typeof Regens,
+        @InjectQueue('markers') 
+        private markersQueue: Queue,
     ) {}
 
     async getUser(params: getUserDto): Promise<User[]> {
-        // check params.ser
         const user = await this.userModel.findAll({
             include: [
                 {model: this.markersModel},
@@ -138,6 +139,23 @@ export class UserAdminService {
             manager.localuser.username,
             manager.id
         );
+
+        const job = await this.markersQueue.getJob(`refreshMarkers-${marker.server}-${marker.id_type}`);
+
+        if (job && job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
+            this.markersQueue.add(
+                {
+                    action: `refreshMarkers-${marker.server}`,
+                    serverName: marker.server,
+                    type: marker.id_type
+                },
+                {
+                    jobId: `refreshMarkers-${marker.server}-${marker.id_type}`,
+                    removeOnComplete: true,
+                    delay: 1000 * 60 * 15,
+                }
+            );
+        }
         
         return { result: true, message: 'Маркер удален' };
     }
@@ -171,8 +189,6 @@ export class UserAdminService {
             return marker;
         });
 
-
-
         this.logsService.logger(
             JSON.stringify({action: 'update-marker', data: {oldMarker: marker, newMarker: body}}),
             'update-marker',
@@ -180,6 +196,23 @@ export class UserAdminService {
             manager.localuser.username,
             manager.id
         );
+
+        const job = await this.markersQueue.getJob(`refreshMarkers-${marker.server}-${marker.id_type}`);
+
+        if (job && job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
+            this.markersQueue.add(
+                {
+                    action: `refreshMarkers-${marker.server}-${marker.id_type}`,
+                    serverName: marker.server,
+                    type: marker.id_type
+                },
+                {
+                    jobId: `refreshMarkers-${marker.server}-${marker.id_type}`,
+                    removeOnComplete: true,
+                    delay: 1000 * 60 * 15,
+                }
+            );
+        }
 
         return { result: true, message: 'Маркер обновлен' };
     }  

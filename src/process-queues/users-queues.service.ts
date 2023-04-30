@@ -1,5 +1,5 @@
-import { Processor, Process, OnQueueCompleted } from '@nestjs/bull';
-import { Job } from 'bull';
+import { Processor, Process, OnQueueCompleted, InjectQueue } from '@nestjs/bull';
+import { Job, Queue } from 'bull';
 import { Territories } from '../territories/territories.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, literal } from 'sequelize';
@@ -32,6 +32,8 @@ export class UsersConsumer {
         private readonly logsService: LogsService,
         @InjectModel(Regens)
         private regensModel: typeof Regens,
+        @InjectQueue('markers') 
+        private markersQueue: Queue,
     ) {}
 
     @Process()
@@ -286,11 +288,40 @@ export class UsersConsumer {
     }
 
     async deleteMarkers(id: string): Promise<void> {
-        await this.markersModel.destroy({
-            where: {
-                user: id
+        const markers = await this.markersModel.findAll(
+            {
+                where: {
+                    user: id
+                },
+                group: ['type_id']
             }
+        ).then((markers) => {
+            this.markersModel.destroy({
+                where: {
+                    user: id
+                }
+            });
+            return markers;
         });
+
+        markers.forEach(async marker => {
+            const job = await this.markersQueue.getJob(`refreshMarkers-${marker.server}-${marker.id_type}`);
+
+            if (job && job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
+                this.markersQueue.add(
+                    {
+                        action: `refreshMarkers-${marker.server}-${marker.id_type}`,
+                        serverName: marker.server,
+                        type: marker.id_type
+                    },
+                    {
+                        jobId: `refreshMarkers-${marker.server}-${marker.id_type}`,
+                        removeOnComplete: true,
+                        delay: 1000 * 60 * 15,
+                    }
+                );
+            }
+     });
     }
 
 }

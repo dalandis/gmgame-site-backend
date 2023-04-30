@@ -21,6 +21,9 @@ import { Regens } from '../admin/users/regens.model';
             },
             {
                 name: 'cron-tasks',
+            },
+            {
+                name: 'markers',
             }
         )
     ],

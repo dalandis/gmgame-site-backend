@@ -16,6 +16,9 @@ import { Regens } from './regens.model';
         BullModule.registerQueue({
             name: 'users',
         }),
+        BullModule.registerQueue({
+            name: 'markers'
+        })
     ],
     controllers: [UserAdminController],
     providers: [UserAdminService, LogsService],
