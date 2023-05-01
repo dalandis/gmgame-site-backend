@@ -22,7 +22,8 @@ export class MarkersConsumer {
     async markersRefresh(job: Job<IJobMarkers>) {
         const markers = await this.markersModel.findAll({
             where: {
-                server: job.data.serverName
+                server: job.data.serverName,
+                id_type: job.data.type
             }
         });
 
