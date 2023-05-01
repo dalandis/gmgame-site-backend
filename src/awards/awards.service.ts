@@ -71,7 +71,7 @@ export class AwardsService {
                 }
             );
 
-            const dataDiscord = `(test) Поздравляем, ${reward.user.username}! Выигрыш ${result.data.prize}`;
+            const dataDiscord = `Поздравляем, ${reward.user.username}! Выигрыш ${result.data.prize}`;
             this.dataProviderService.sendDiscordWebHook(dataDiscord, 'Yakubovich');
 
             return {message: 'reward is give'};
