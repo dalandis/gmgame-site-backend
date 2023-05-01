@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsInt, Matches} from 'class-validator';
+import {IsNotEmpty, IsInt, Matches, IsString} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class territoriesDto {
@@ -7,7 +7,7 @@ export class territoriesDto {
     server: string;
 
     @IsNotEmpty()
-    @Matches('^[a-zA-Z0-9а-яА-Я !_-]+$')
+    @IsString()
     name: string
 
     @IsNotEmpty()
