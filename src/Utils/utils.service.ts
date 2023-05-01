@@ -17,7 +17,7 @@ export class UtilsService {
             case 'nether-farm':
                 return {worldName: 'FarmWorld-Nether - nether', layer: 'nether'};
             case 'end-farm':
-                return {worldName: 'FarmWorld-End - end', layer: 'end'};
+                return {worldName: 'FarmWorld-End - end', layer: 'the_end'};
             default:
                 return {worldName: 'GMGameWorld - overworld', layer: 'over'};
         }
