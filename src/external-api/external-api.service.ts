@@ -446,4 +446,33 @@ export class ExternalApiService {
             return { "error": "unknown error", "status_code": 400, "status": null };
         }
     }
+
+    async kickUser(params): Promise<Record<string,string|number|Record<string,string>>> {
+        try{
+            const user = await this.userModel.findOne({
+                where: {user_id: params.user},
+                attributes: ['username']
+            });
+
+            if (!user) {
+                return { "error": "user not found", "status_code": 400, "status": null };
+            }
+
+            const response = await this.dataProviderService.sendToServerApi({user: user.username}, 'kick_user_new', 'POST');
+
+            if (response.status != 200) {
+                return { "error": `error kick user, ${response.status}`, "status_code": 400, "status": null }
+            }
+
+            return {
+                "success": "ok", "status_code": 200, "error": "", 
+                "data": {
+                    "username": user.username
+                }
+            }
+        } catch (err) {
+            console.log(err);
+            return { "error": "unknown error", "status_code": 400, "status": null };
+        }
+    }
 }

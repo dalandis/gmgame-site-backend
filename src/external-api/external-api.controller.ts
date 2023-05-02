@@ -114,5 +114,19 @@ export class ExternalApiController {
 
         res.send(JSON.stringify(territories));
     }
+
+    @SetMetadata('role', 'bot')
+    @UseGuards(LoginGuardBearer, RoleGuard)
+    @Post('/kick_user')
+    async kickUser(@Request() req, @Response() res, @Body() body): Promise<any> {
+        const response = await this.externalApiService.kickUser(body);
+
+        if (response.error) {
+            res.status(HttpStatus.BAD_REQUEST).json(response);
+            return;
+        }
+
+        res.send(response);
+    }
 }
 
