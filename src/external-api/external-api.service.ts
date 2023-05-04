@@ -248,18 +248,18 @@ export class ExternalApiService {
                 type: 0
             });
 
-            return {};
+            return {satus: 6};
         }
 
         if (!user?.username) {
-            return {};
+            return {status: 6};
         }
 
         let toUpadate: {is_discord?: boolean, expiration_date?: Date} = {};
 
         if (params.event === 'join') {
             if (user.is_discord) {
-                return {};
+                return {status: user.status};
             }
 
             toUpadate = {is_discord: true};
@@ -285,7 +285,7 @@ export class ExternalApiService {
                 toUpadate = {...toUpadate, ...{expiration_date: expirationDate}};
             }
         }
-        console.log(toUpadate)
+        
         if (toUpadate.expiration_date) {
             this.logsService.logger(
                 `Change expiration date for reason ${params.event} with ${user.expiration_date || user.createdAt} to ${toUpadate.expiration_date}`, 
@@ -302,7 +302,7 @@ export class ExternalApiService {
             }
         ).catch(err => console.log(err));
 
-        return {};
+        return {status: user.status};
     }
 
     async denyUser(params: decisionUserDto): Promise<Record<string,string|number>> {

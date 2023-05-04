@@ -88,7 +88,7 @@ export class UsersService {
 Предыдущие сервера: ${params.servers}
 Откуда узнали о проекте: ${params.from_about}
 Интересы в Minecraft: ${params.you_about}
-Заявка от: ${params.partner}
+Заявка от: ${params.partner || 'gmgame'}
 Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
 <@${discordUser.id}>`;
 

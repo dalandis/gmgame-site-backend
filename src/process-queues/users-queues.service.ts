@@ -51,6 +51,8 @@ export class UsersConsumer {
             await this.deleteFromWl(job.data.username);
             await job.progress(80);
 
+            await this.removePlayerRole(job.data.id);
+
             await this.deleteUser(job.data.id);
         } else if (job.data.action === 'suspend-user') {
             await this.deleteFromWl(job.data.username);
@@ -59,10 +61,12 @@ export class UsersConsumer {
             await job.progress(60);
             await this.suspendMarkers(job.data.id);
             await this.addManualProcess(job);
+            await this.removePlayerRole(job.data.id);
         } else if (job.data.action === 'ban-user') {
             await this.deleteFromWl(job.data.username);
             await job.progress(50);
             await this.addManualProcess(job);
+            await this.removePlayerRole(job.data.id);
 
             await this.changeStatus(job.data.id, 'ban');
         } else if (job.data.action === 'resume-user' || job.data.action === 'unban-user') {
@@ -72,13 +76,14 @@ export class UsersConsumer {
             await job.progress(30);
             await this.addToWl(job.data.username);
             await job.progress(60);
-
+            await this.addPlayerRole(job.data.id);
             await this.changeStatus(job.data.id, 'active');
         } else if (job.data.action === 'accept-user') {
             await this.updateUser(job.data.id);
             await job.progress(30);
             await this.addUserToServer(job.data.id);
             await job.progress(60);
+            await this.removePlayerRole(job.data.id);
 
             await this.changeStatus(job.data.id, 'active');
         }
@@ -109,6 +114,14 @@ export class UsersConsumer {
                 },
             });
         }
+    }
+
+    async removePlayerRole(id: string): Promise<void> {
+        await this.dataProviderService.sendToBot({user: id}, 'remove_role', 'POST');
+    }
+
+    async addPlayerRole(id: string): Promise<void> {
+        await this.dataProviderService.sendToBot({user: id}, 'add_role', 'POST');
     }
 
     async addManualProcess(job: Job<IJob>): Promise<void> {
