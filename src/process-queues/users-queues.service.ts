@@ -83,7 +83,7 @@ export class UsersConsumer {
             await job.progress(30);
             await this.addUserToServer(job.data.id);
             await job.progress(60);
-            await this.removePlayerRole(job.data.id);
+            await this.addPlayerRole(job.data.id);
 
             await this.changeStatus(job.data.id, 'active');
         }
