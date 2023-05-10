@@ -19,7 +19,7 @@ export class CronTasksService {
         timeZone: 'Europe/Moscow'
     })
     async handleCron() {
-        if (process.env.pm_id !== '7') {
+        if (process.env.pm_id !== '2') {
             return;
         }
         if (process.env.NODE_ENV === 'dev') {
