@@ -105,7 +105,7 @@ export class ExternalApiController {
             return;
         }
 
-        res.send(response.success);
+        res.send(response);
     }
 
     @Get('/locations/:world/:status')
