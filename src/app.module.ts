@@ -55,7 +55,7 @@ import { ScheduleModule } from '@nestjs/schedule';
             useFactory: () => ({
                 dialect: 'mysql',
                 host: process.env.MYSQL_HOST,
-                port: 3306,
+                port: Number(process.env.MYSQL_PORT) || 3306,
                 username: process.env.MYSQL_DB_USER,
                 password: process.env.MYSQL_DB_PASSWORD,
                 database: process.env.MYSQL_DB_NAME,

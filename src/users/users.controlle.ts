@@ -17,6 +17,10 @@ export class UsersController {
     async profile(@Request() req, @Response() res): Promise<any> {
         const user = await this.usersService.getUser(req.user.id);
 
+        if (user?.status !== req.session.passport.user.localuser.status) {
+            req.session.passport.user.localuser.status = user?.status;
+        }
+
         res.send({
             discordUser: req.user,
             user: user,

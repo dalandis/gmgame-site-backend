@@ -2,11 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
-const cookieSession = require('cookie-session')
-const Queue = require('bull')
-const { createBullBoard } = require('bull-board')
+const cookieSession = require('cookie-session');
+const Queue = require('bull');
+const { createBullBoard } = require('bull-board');
 const { BullAdapter } = require('bull-board/bullAdapter')
 import * as basicAuth from 'express-basic-auth';
+// const connectRedis = require('connect-redis');
+const redis = require('redis')
+const session = require('express-session')
+import RedisStore from "connect-redis"
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -16,12 +20,39 @@ async function bootstrap() {
         credentials: true
     });
 
-    app.use(cookieSession({
-        name: 'session',
-        keys: [process.env.SECRET_SESSION],
-        maxAge: 24 * 60 * 60 * 1000 // 24 часа
-    }))
+    // app.use(cookieSession({
+    //     name: 'session',
+    //     keys: [process.env.SECRET_SESSION],
+    //     maxAge: 24 * 60 * 60 * 1000 // 24 часа
+    // }))
+    // session to redis
+    // const RedisStore = connectRedis(session)
 
+    // const RedisStore = createRedisStore(session);
+    // Initialize client.
+    let redisClient = redis.createClient()
+    redisClient.connect().catch(console.error)
+
+    // Initialize store.
+    let redisStore = new RedisStore({
+        client: redisClient,
+        prefix: "gmgame:",
+    })
+
+    app.use(
+        session({
+          store: redisStore,
+          resave: false, 
+          saveUninitialized: false, 
+          secret: process.env.SECRET_SESSION,
+          cookie: {
+            secure: false,
+            httpOnly: false,
+            maxAge: 1000 * 60 * 10,
+          },
+        })
+    )
+ 
     app.use(passport.initialize());
     app.use(passport.session());
 

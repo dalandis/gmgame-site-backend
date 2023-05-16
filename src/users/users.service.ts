@@ -18,7 +18,8 @@ export class UsersService {
         return this.userModel.findOne({
             where: {
                 user_id,
-            }
+            },
+            attributes: ['status', 'username']
         });
     }
 
