@@ -25,7 +25,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 @Module({
     imports: [
         ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '../..', 'gmgame-site', 'build'),
+            rootPath: join(__dirname, '../../..', 'gmgame-site', 'build'),
             // serveRoot: '/(.*)',
             // exclude: ['/admin/(.*)'],
         }),

@@ -73,7 +73,7 @@ export class UsersService {
             partner: 'gmgame',
             reg_date: new Date(),
             expiration_date: new Date(),
-            is_discord: discordResponse.data?.data || false
+            is_discord: discordResponse?.data?.data || false
         });
 
         await this.sendWebhook(params, discordUser);
@@ -93,7 +93,7 @@ export class UsersService {
 Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
 <@${discordUser.id}>`;
 
-        this.dataProviderService.sendDiscordWebHook(data, 'applicant');
+        // this.dataProviderService.sendDiscordWebHook(data, 'applicant');
     }
 
     async changePassword(params, user) {
