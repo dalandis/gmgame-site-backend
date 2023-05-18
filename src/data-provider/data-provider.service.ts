@@ -38,7 +38,7 @@ export class DataProviderService {
     }
 
     public async sendToBot(payload: Record<string,string|number>, url: string, method: string): Promise<AxiosResponse> {
-        return axios.request({
+        const response = axios.request({
             data: JSON.stringify(payload),
             method: method,
             url: process.env.URL_FOR_BOT_API + url,
@@ -46,7 +46,12 @@ export class DataProviderService {
                 Authorization: 'Bearer ' + process.env.TOKEN_FOR_BOT_API,
                 'Content-type': 'application/json'
             }
-        })
+        }).catch((error) => {
+            console.log(error);
+            return error;
+        });
+
+        return response;
     }
 
     private getUrlWebhook(username: string): string {
