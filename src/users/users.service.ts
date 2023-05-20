@@ -28,12 +28,11 @@ export class UsersService {
             where: {
                 [Op.and]: [
                     {user_id: discordUser.id},
-                    {username: params.login}
                 ]
             }
         });
 
-        if (user) {
+        if (user && user.username) {
             return {error: 'user exist'};
         }
 
@@ -58,6 +57,7 @@ export class UsersService {
             discordResponse = await this.dataProviderService.sendToBot({user: discordUser.id}, 'check_user_define', 'POST');
         } catch (error) {
             console.log(error);
+            return {error: 'discord error'};
         }
 
         await this.userModel.upsert({
@@ -93,7 +93,7 @@ export class UsersService {
 Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
 <@${discordUser.id}>`;
 
-        // this.dataProviderService.sendDiscordWebHook(data, 'applicant');
+        this.dataProviderService.sendDiscordWebHook(data, 'applicant');
     }
 
     async changePassword(params, user) {
