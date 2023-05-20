@@ -301,19 +301,17 @@ export class UsersConsumer {
     }
 
     async deleteMarkers(id: string): Promise<void> {
-        const markers = await this.markersModel.findAll(
-            {
-                where: {
-                    user: id
-                }
+        const markers = await this.markersModel.findAll({
+            where: {
+                user: id
+            },
+            group: ['id_type']
+        });
+
+        this.markersModel.destroy({
+            where: {
+                user: id
             }
-        ).then((markers) => {
-            this.markersModel.destroy({
-                where: {
-                    user: id
-                }
-            });
-            return markers;
         });
 
         markers.forEach(async marker => {
