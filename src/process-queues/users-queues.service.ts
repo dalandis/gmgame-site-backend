@@ -305,8 +305,7 @@ export class UsersConsumer {
             {
                 where: {
                     user: id
-                },
-                group: ['type_id']
+                }
             }
         ).then((markers) => {
             this.markersModel.destroy({
