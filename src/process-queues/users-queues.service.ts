@@ -287,7 +287,7 @@ export class UsersConsumer {
     async deleteAwards(id: string): Promise<void> {
         await this.awardsModel.destroy({
             where: {
-                user: id
+                user_id: id
             }
         });
     }
