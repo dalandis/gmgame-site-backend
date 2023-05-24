@@ -21,6 +21,7 @@ import { ProcessQueuesModule } from './process-queues/process-queues.module';
 import { LogsModule } from './logs/logs.module';
 import { CronTasksModule } from './cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FaqModule } from './faq/faq.module'
 
 @Module({
     imports: [
@@ -50,6 +51,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         ProcessQueuesModule,
         LogsModule,
         CronTasksModule,
+        FaqModule,
         ScheduleModule.forRoot(),
         SequelizeModule.forRootAsync({
             useFactory: () => ({

@@ -40,7 +40,7 @@ export class MarkersController {
     @Post('/edit_marker')
     async editMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.editMarker(body, req.user.id, req.user);
-        console.log(message);
+
         res.send(JSON.stringify(message));
     }
 
@@ -49,7 +49,7 @@ export class MarkersController {
     @Post('add_marker')
     async addMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.addMarker(body, req.user.id, req.user);
-        console.log(message);
+
         res.send(JSON.stringify(message));
     }
 
@@ -58,7 +58,7 @@ export class MarkersController {
     @Post('delete_marker')
     async deleteMarker(@Request() req, @Body() body: markersDto, @Response() res): Promise<any> {
         const message = await this.markersService.deleteMarker(body, req.user.id, req.user);
-        console.log(message);
+
         res.send(JSON.stringify(message));
     }
 }

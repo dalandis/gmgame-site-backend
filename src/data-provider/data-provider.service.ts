@@ -37,7 +37,7 @@ export class DataProviderService {
         })
     }
 
-    public async sendToBot(payload: Record<string,string|number>, url: string, method: string): Promise<AxiosResponse> {
+    public async sendToBot<T>(payload: T , url: string, method: string): Promise<AxiosResponse> {
         const response = axios.request({
             data: JSON.stringify(payload),
             method: method,
