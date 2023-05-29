@@ -17,14 +17,15 @@ export class FaqService {
     ) {}
 
     async saveFaq(data: saveFaqDto): Promise<any> {
-        const faq = await this.faqModel.findOne({ where: { id: data.id } });
+        let faq = await this.faqModel.findOne({ where: { id: data.id } });
+
         if (faq) {
             await this.faqModel.update(data, { where: { id: data.id } });
         } else {
             delete data.id;
-            await this.faqModel.create(data);
+            faq = await this.faqModel.create(data);
         }
-        return true;
+        return {message: 'Сохранено', quest: faq};
     }
 
     async getMentions(): Promise<any> {

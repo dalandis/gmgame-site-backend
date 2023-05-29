@@ -28,8 +28,6 @@ export class FaqController {
         res.send(JSON.stringify(mentions)); 
     }
 
-    @SetMetadata('role', 'admin')
-    @UseGuards(AuthenticatedGuard, RoleGuard)
     @Get('/get_faq')
     async getFaq(@Request() req, @Response() res): Promise<any> {
         const faq = await this.faqService.getFaq();
