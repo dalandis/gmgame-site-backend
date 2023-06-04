@@ -94,6 +94,8 @@ export class UsersService {
 <@${discordUser.id}>`;
 
         this.dataProviderService.sendDiscordWebHook(data, 'applicant');
+
+        this.dataProviderService.sendToBot({ticket: data}, 'new_ticket', 'POST');
     }
 
     async changePassword(params, user) {
