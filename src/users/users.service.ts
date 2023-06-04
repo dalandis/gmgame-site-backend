@@ -26,8 +26,9 @@ export class UsersService {
     async addUser(params, discordUser): Promise<Record<string,string>> {
         const user = await this.userModel.findOne({
             where: {
-                [Op.and]: [
+                [Op.or]: [
                     {user_id: discordUser.id},
+                    {username: params.login}
                 ]
             }
         });
