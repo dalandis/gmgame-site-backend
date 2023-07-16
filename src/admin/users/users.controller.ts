@@ -148,4 +148,18 @@ export class UserAdminController {
         res.send(JSON.stringify(response));
     }
 
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/get_whitelist')
+    async getWhitelist(@Request() req, @Response() res): Promise<string> {
+        const response = await this.userAdminService.getWhitelist();
+
+        if (!response) {
+            res.send(JSON.stringify({error: 'Нет вайтлиста'}));
+            return;
+        }
+
+        res.send(JSON.stringify(response));
+    }
+
 }

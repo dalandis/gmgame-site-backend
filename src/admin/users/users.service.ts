@@ -387,4 +387,13 @@ export class UserAdminService {
 
         return { result: true, message: 'Реген завершен' };
     }
+
+    async getWhitelist(): Promise<any> {
+        return this.userModel.findAll({
+            where: {
+                status: 2
+            },
+            attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age', 'from_about', 'you_about', 'partner', 'immun', 'note', 'expiration_date']
+        });
+    }
 }
