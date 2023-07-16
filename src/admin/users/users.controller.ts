@@ -104,6 +104,15 @@ export class UserAdminController {
         res.send(JSON.stringify(response));
     }
 
+    @SetMetadata('role', 'admin')
+    @UseGuards(AuthenticatedGuard, RoleGuard)
+    @Post('/delete_territory')
+    async deleteTerritory(@Request() req, @Response() res, @Body() body: markersDto): Promise<void> {
+        const response = await this.userAdminService.deleteTerritory(body.id, req.user);
+
+        res.send(JSON.stringify(response));
+    }
+
     // get_regens
     @SetMetadata('role', 'admin')
     @UseGuards(AuthenticatedGuard, RoleGuard)

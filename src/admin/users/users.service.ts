@@ -217,6 +217,32 @@ export class UserAdminService {
         return { result: true, message: 'Маркер обновлен' };
     }  
 
+    async deleteTerritory(id: number, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
+        const territory = await this.territoriesModel.findOne({
+            where: {
+                id: id
+            },
+            attributes: ['name', 'world', 'xStart', 'xStop', 'zStart', 'zStop', 'user']
+        }).then((territory) => {
+            this.territoriesModel.destroy({
+                where: {
+                    id: id
+                }
+            });
+            return territory;
+        });
+
+        this.logsService.logger(
+            JSON.stringify({action: 'delete-territory', data: territory}),
+            'delete-territory',
+            territory.user,
+            manager.localuser.username,
+            manager.id
+        );
+
+        return { result: true, message: 'Территория удалена' };
+    }
+
     async updateTerritory(body: terrUpdateDto, manager): Promise<{error?: boolean, result?: boolean, message?: string}> {
         const territory = await this.territoriesModel.findOne({
             where: {
@@ -225,10 +251,10 @@ export class UserAdminService {
             attributes: ['name', 'world', 'xStart', 'xStop', 'zStart', 'zStop', 'user', 'status']
         }).then((territory) => {
             let status = territory.status;
-            if (body.name.includes('[hold]')) {
+            if (body?.name?.includes('[hold]')) {
                 status = 'hold';
             }
-            if (body.name.includes('[repopulate]')) {
+            if (body?.name?.includes('[repopulate]')) {
                 status = 'repopulate';
             }
 
