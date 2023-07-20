@@ -15,6 +15,7 @@ interface IJob{
     id: string;
     username: string;
     manager: string;
+    payload?: any;
 }
 
 @Processor('users')
@@ -86,6 +87,8 @@ export class UsersConsumer {
             await this.addPlayerRole(job.data.id);
 
             await this.changeStatus(job.data.id, 'active');
+        } else if (job.data.action === 'create-new-user-ticket') {
+            await this.sendTicket(job.data.payload);
         }
 
         await job.progress(100);
@@ -95,6 +98,10 @@ export class UsersConsumer {
 
     @OnQueueCompleted()
     async onActive(job: Job, result: any) {
+        if (job.data.noLog) {
+            return;
+        }
+
         let log = JSON.stringify(job.data);
 
         await this.logsService.logger(log, job.data.action , job.data.id, job.data.managerName, job.data.manager);
@@ -113,6 +120,17 @@ export class UsersConsumer {
                     user_id: id,
                 },
             });
+        }
+    }
+
+    async sendTicket(payload: any): Promise<void> {
+        const response = await this.dataProviderService.sendToBot(payload, 'create_ticket', 'POST')
+            .catch((err) => {
+                throw new Error('Error while creating ticket');
+            });
+
+        if (response.status != 200) {
+            throw new Error('Error while creating ticket');
         }
     }
 

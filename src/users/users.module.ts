@@ -8,10 +8,14 @@ import { UtilsService } from '../Utils/utils.service';
 import { User } from './users.model'
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { Territories } from '../territories/territories.model';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([User, Awards, Markers, Territories])
+        SequelizeModule.forFeature([User, Awards, Markers, Territories]),
+        BullModule.registerQueue({
+            name: 'users',
+        }),
     ],
     controllers: [UsersController],
     providers: [UsersService, UtilsService, DataProviderService],

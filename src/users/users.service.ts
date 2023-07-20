@@ -4,6 +4,8 @@ import { Op } from 'sequelize';
 import { User } from './users.model';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { UtilsService } from '../Utils/utils.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class UsersService {
@@ -11,7 +13,9 @@ export class UsersService {
         @InjectModel(User)
         private userModel: typeof User,
         private readonly dataProviderService: DataProviderService,
-        private readonly utilsService: UtilsService
+        private readonly utilsService: UtilsService,
+        @InjectQueue('users') 
+        private usersQueue: Queue,
     ) {}
 
     async getUser(user_id: string): Promise<User> {
@@ -77,26 +81,61 @@ export class UsersService {
             is_discord: discordResponse?.data?.data || false
         });
 
-        await this.sendWebhook(params, discordUser);
+        this.sendWebhook(params, discordUser);
 
         return {message: 'user create successful'};
     }
 
     private async sendWebhook(params, discordUser) {
-        const data = '```' + `
-Игровой ник: ${params.login}
-Аккаунт: ${this.utilsService.getAccountType(params.type)}
-Возраст: ${params.age}
-Предыдущие сервера: ${params.servers}
-Откуда узнали о проекте: ${params.from_about}
-Интересы в Minecraft: ${params.you_about}
-Заявка от: ${params.partner || 'gmgame'}
-Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
-<@${discordUser.id}>`;
+//         const data = '```' + `
+// Игровой ник: ${params.login}
+// Аккаунт: ${this.utilsService.getAccountType(params.type)}
+// Возраст: ${params.age}
+// Предыдущие сервера: ${params.servers}
+// Откуда узнали о проекте: ${params.from_about}
+// Интересы в Minecraft: ${params.you_about}
+// Заявка от: ${params.partner || 'gmgame'}
+// Ник друга: ${params.friend_name || 'нет'}
+// Дискорд: ${this.utilsService.getDiscord(discordUser)}` + '```' + `
+// <@${discordUser.id}>`;
 
-        this.dataProviderService.sendDiscordWebHook(data, 'applicant');
+        const payload = {
+            login: params.login,
+            account: this.utilsService.getAccountType(params.type),
+            age: params.age,
+            servers: params.servers,
+            from_about: params.from_about,
+            you_about: params.you_about,
+            partner: params.partner || 'gmgame',
+            friend_name: params.friend_name || 'нет',
+            discord: this.utilsService.getDiscord(discordUser),
+            discordId: discordUser.id,
+        }
 
-        this.dataProviderService.sendToBot({ticket: data, name: params.login}, 'new_ticket', 'POST');
+        const job = await this.usersQueue.getJob(`${discordUser.id}-create-new-user-ticket`);
+
+        if (job && job.data.action === `create-new-user-ticket`) {
+            return {error: true,  message: 'Уже есть такая заявка'};
+        }
+
+        this.usersQueue.add(
+            {
+                action: `create-new-user-ticket`,
+                id: discordUser.id,
+                username: params.login,
+                manager: discordUser.id,
+                managerName: params.login,
+                payload: payload,
+                noLog: true
+            },
+            {
+                jobId: `${discordUser.id}-create-new-user-ticket`,
+                removeOnComplete: false,
+            }
+        );
+
+        // this.dataProviderService.sendToBot({ticket: data, name: params.login}, 'new_ticket', 'POST');
+        // this.dataProviderService.sendToBot(payload, 'create_ticket', 'POST');
     }
 
     async changePassword(params, user) {
