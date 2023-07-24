@@ -78,7 +78,7 @@ export class MarkersService {
                 `маркер изменен ${marker} => ${params}`,
                 'update-marker',
                 user,
-                manager.localuser.username,
+                manager.localuser?.username || manager.username,
                 manager.id
             );
 
@@ -108,7 +108,7 @@ export class MarkersService {
                 `Добавлен маркер ${marker}`,
                 'add-marker',
                 user,
-                manager.localuser.username,
+                manager.localuser?.username || manager.username,
                 manager.id
             );
 
@@ -141,7 +141,7 @@ export class MarkersService {
                 `Удален маркер ${marker}`,
                 'delete-marker',
                 user,
-                manager.localuser.username,
+                manager.localuser?.username || manager.username,
                 manager.id
             );
 
