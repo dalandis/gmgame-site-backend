@@ -12,7 +12,7 @@ export class Awards extends Model<Awards> {
     @Column({ type: DataType.INTEGER, allowNull: false })
     issued: number;
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: false, primaryKey: true })
     user_id: string;
 
     @HasOne(() => User, {sourceKey: 'user_id', foreignKey: 'user_id'})
