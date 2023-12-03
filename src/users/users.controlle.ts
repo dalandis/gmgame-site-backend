@@ -19,6 +19,9 @@ export class UsersController {
 
         if (user?.status && req.session.passport.user?.localuser?.status && user?.status !== req.session.passport.user?.localuser?.status) {
             req.session.passport.user.localuser.status = user?.status;
+            if (user?.status === 2) {
+                req.session.passport.user.role = 'player';
+            }
         }
 
         res.send({

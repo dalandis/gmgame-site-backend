@@ -22,7 +22,7 @@ export class Markers extends Model<Markers> {
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.TEXT, allowNull: true })
     description: string;
 
     @Column({ type: DataType.STRING, allowNull: false })

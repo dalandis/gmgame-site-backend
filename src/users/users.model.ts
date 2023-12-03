@@ -8,7 +8,7 @@ export class User extends Model<User> {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number; //INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
-    @Column({ type: DataType.STRING, unique: true, allowNull: true })
+    @Column({ type: DataType.STRING, allowNull: true })
     username: string; //VARCHAR(100) NOT NULL UNIQUE,
 
     @Column({ type: DataType.STRING, allowNull: true })
@@ -23,16 +23,16 @@ export class User extends Model<User> {
     @Column({ type: DataType.INTEGER, allowNull: false })
     age: number; //VARCHAR(10),
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.TEXT, allowNull: true })
     from_about: string; //TEXT,
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.TEXT, allowNull: false })
     you_about: string; //TEXT,
 
     @Column({ type: DataType.INTEGER, allowNull: false })
     status: number; //INT NOT NULL,
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: false, primaryKey: true })
     user_id: string; //VARCHAR(100) NOT NULL UNIQUE,
 
     @Column({ type: DataType.STRING, allowNull: true })
@@ -47,10 +47,13 @@ export class User extends Model<User> {
     @HasMany(() => Territories, {sourceKey: 'user_id', foreignKey: 'user'})
     territories: Territories;
 
+    @HasMany(() => Awards, {sourceKey: 'user_id', foreignKey: 'user_id'})
+    awards: Awards[];
+
     @Column({ type: DataType.BOOLEAN, allowNull: true })
     immun: boolean;
 
-    @Column({ type: DataType.STRING, allowNull: true })
+    @Column({ type: DataType.TEXT, allowNull: true })
     note: string;
 
     @Column({ type: DataType.DATE, allowNull: true })

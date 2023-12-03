@@ -75,7 +75,7 @@ export class MarkersService {
             this.sendTask(marker.server, marker.id_type);
 
             this.logsService.logger(
-                `маркер изменен ${marker} => ${params}`,
+                `маркер изменен => ${JSON.stringify(params)}`,
                 'update-marker',
                 user,
                 manager.localuser?.username || manager.username,
@@ -105,7 +105,7 @@ export class MarkersService {
             this.sendTask(marker.server, marker.id_type);
 
             this.logsService.logger(
-                `Добавлен маркер ${marker}`,
+                `Добавлен маркер ${JSON.stringify(marker)}`,
                 'add-marker',
                 user,
                 manager.localuser?.username || manager.username,
@@ -138,7 +138,7 @@ export class MarkersService {
             this.sendTask(marker.server, marker.id_type);
 
             this.logsService.logger(
-                `Удален маркер ${marker}`,
+                `Удален маркер ${JSON.stringify(marker)}`,
                 'delete-marker',
                 user,
                 manager.localuser?.username || manager.username,

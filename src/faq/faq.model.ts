@@ -1,4 +1,5 @@
 import { Column, DataType, HasOne, Model, Table } from "sequelize-typescript";
+import { FaqDescription } from "./faqDescription.model";
 
 @Table({tableName: 'faq'})
 export class Faq extends Model<Faq> {
@@ -16,4 +17,7 @@ export class Faq extends Model<Faq> {
 
     @Column({ type: DataType.STRING, allowNull: true})
     category: string;
+
+    @HasOne(() => FaqDescription, {sourceKey: 'category', foreignKey: 'category'})
+    faqDescription: FaqDescription;
 }
