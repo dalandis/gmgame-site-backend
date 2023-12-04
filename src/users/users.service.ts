@@ -81,7 +81,7 @@ export class UsersService {
             is_discord: discordResponse?.data?.data || false
         });
 
-        // this.sendWebhook(params, discordUser);
+        this.sendWebhook(params, discordUser);
 
         return {message: 'user create successful'};
     }
