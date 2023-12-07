@@ -23,7 +23,7 @@ export class UsersService {
             where: {
                 user_id,
             },
-            attributes: ['status', 'username']
+            attributes: ['status', 'username', 'age']
         });
     }
 
