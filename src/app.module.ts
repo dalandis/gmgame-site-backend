@@ -23,6 +23,7 @@ import { CronTasksModule } from './cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FaqModule } from './faq/faq.module'
 import { GoalsModule } from './goals/goals.module';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
     imports: [
@@ -54,6 +55,7 @@ import { GoalsModule } from './goals/goals.module';
         CronTasksModule,
         FaqModule,
         GoalsModule,
+        ArticlesModule,
         ScheduleModule.forRoot(),
         SequelizeModule.forRootAsync({
             useFactory: () => ({
