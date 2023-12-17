@@ -11,6 +11,7 @@ import * as basicAuth from 'express-basic-auth';
 const redis = require('redis')
 const session = require('express-session')
 import RedisStore from "connect-redis"
+import { json } from 'express';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -68,6 +69,8 @@ async function bootstrap() {
         users: { [process.env.BASIC_AUTH_USERNAME]: process.env.BASIC_AUTH_PASSWORD },
         challenge: true
     })
+
+    app.use(json({ limit: '50mb' }));
     
     app.use('/admin/queues', protect, router);
     

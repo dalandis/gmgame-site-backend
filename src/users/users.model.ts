@@ -2,6 +2,7 @@ import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
 import { Markers } from "../markers/markers.model";
 import { Awards } from '../awards/awards.model';
 import { Territories } from "../territories/territories.model";
+import { Tickets } from "../tickets/tickets.model";
 
 @Table({tableName: 'users'})
 export class User extends Model<User> {
@@ -49,6 +50,9 @@ export class User extends Model<User> {
 
     @HasMany(() => Awards, {sourceKey: 'user_id', foreignKey: 'user_id'})
     awards: Awards[];
+
+    @HasMany(() => Tickets, {sourceKey: 'user_id', foreignKey: 'user_id'})
+    tickets: Tickets[];
 
     @Column({ type: DataType.BOOLEAN, allowNull: true })
     immun: boolean;

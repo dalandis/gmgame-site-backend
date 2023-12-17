@@ -9,6 +9,7 @@ import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../../logs/logs.service';
 import { Regens } from './regens.model';
+import { Tickets } from '../../tickets/tickets.model';
 
 @Injectable()
 export class UserAdminService {
@@ -26,13 +27,16 @@ export class UserAdminService {
         private regensModel: typeof Regens,
         @InjectQueue('markers') 
         private markersQueue: Queue,
+        @InjectModel(Tickets)
+        private ticketsModel: typeof Tickets
     ) {}
 
     async getUser(params: getUserDto): Promise<User[]> {
         const user = await this.userModel.findAll({
             include: [
                 {model: this.markersModel},
-                {model: this.territoriesModel}
+                {model: this.territoriesModel},
+                {model: this.ticketsModel}
             ],
             where: {
                 [Op.or]: [
