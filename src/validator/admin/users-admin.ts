@@ -1,4 +1,4 @@
-import {IsDate, IsInt, IsNotEmpty, IsOptional, IsString, isString} from 'class-validator';
+import {IsBoolean, IsDate, IsInt, IsNotEmpty, IsOptional, IsString, isString} from 'class-validator';
 
 export class getUserDto {
     @IsNotEmpty()
@@ -107,6 +107,10 @@ export class updateUserDto {
     @IsOptional()
     @IsString()
     expiration_date?: Date;
+
+    @IsOptional()
+    @IsBoolean()
+    citizenship?: boolean;
 }
 
 export class regenActionDto {

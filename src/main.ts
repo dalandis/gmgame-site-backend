@@ -62,7 +62,8 @@ async function bootstrap() {
     const { router, setQueues, replaceQueues, addQueue, removeQueue } = createBullBoard([
         new BullAdapter(new Queue('users')),
         new BullAdapter(new Queue('cron-tasks')),
-        new BullAdapter(new Queue('markers'))
+        new BullAdapter(new Queue('markers')),
+        new BullAdapter(new Queue('citizenship'))
       ])
     
     const protect = basicAuth({
