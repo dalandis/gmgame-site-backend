@@ -74,6 +74,9 @@ export class User extends Model<User> {
   @Column({ type: DataType.BOOLEAN, allowNull: false })
   citizenship: boolean;
 
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
+  balance: number;
+
   // @HasMany(() => Awards, {foreignKey: 'user_id'})
   // awards: Awards[];
 }

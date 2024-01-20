@@ -43,7 +43,7 @@ export class UserAdminService {
       include: [
         { model: this.markersModel },
         { model: this.territoriesModel },
-        { model: this.ticketsModel },
+        { model: this.ticketsModel, attributes: { exclude: ['html'] } },
       ],
       where: {
         [Op.or]: [
@@ -534,6 +534,14 @@ export class UserAdminService {
         'note',
         'expiration_date',
       ],
+    });
+  }
+
+  async getTicket(id: number): Promise<any> {
+    return this.ticketsModel.findOne({
+      where: {
+        id: id,
+      },
     });
   }
 }
