@@ -1,11 +1,7 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
-import { Markers } from '../markers/markers.model';
-import { Awards } from '../awards/awards.model';
-import { Territories } from '../territories/territories.model';
-import { Tickets } from '../tickets/tickets.model';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
-@Table({ tableName: 'users' })
-export class User extends Model<User> {
+@Table({ tableName: 'old_users' })
+export class OldUser extends Model<OldUser> {
   @Column({
     type: DataType.INTEGER,
     unique: true,
@@ -46,18 +42,6 @@ export class User extends Model<User> {
 
   @Column({ type: DataType.DATE, allowNull: true })
   reg_date: Date;
-
-  @HasMany(() => Markers, { sourceKey: 'user_id', foreignKey: 'user' })
-  markers: Markers[];
-
-  @HasMany(() => Territories, { sourceKey: 'user_id', foreignKey: 'user' })
-  territories: Territories;
-
-  @HasMany(() => Awards, { sourceKey: 'user_id', foreignKey: 'user_id' })
-  awards: Awards[];
-
-  @HasMany(() => Tickets, { sourceKey: 'user_id', foreignKey: 'user_id' })
-  tickets: Tickets[];
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
   immun: boolean;

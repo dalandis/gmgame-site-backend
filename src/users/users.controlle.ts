@@ -70,4 +70,16 @@ export class UsersController {
 
     res.send(JSON.stringify(message));
   }
+
+  @SetMetadata('role', 'player')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('/resubmit')
+  async resubmit(
+    @Request() req,
+    @Response() res,
+  ): Promise<any> {
+    const message = await this.usersService.resubmit(req.user);
+
+    res.send(JSON.stringify(message));
+  }
 }
