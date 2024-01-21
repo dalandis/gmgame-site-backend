@@ -74,7 +74,7 @@ export class UsersService {
       citizenship: false,
     });
 
-    this.sendWebhook(params, discordUser, user.reapplication);
+    this.sendWebhook(params, discordUser, user?.reapplication );
 
     return { message: 'user create successful' };
   }
