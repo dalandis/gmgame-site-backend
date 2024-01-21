@@ -71,8 +71,7 @@ export class UsersController {
     res.send(JSON.stringify(message));
   }
 
-  @SetMetadata('role', 'player')
-  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @UseGuards(AuthenticatedGuard)
   @Post('/resubmit')
   async resubmit(
     @Request() req,
