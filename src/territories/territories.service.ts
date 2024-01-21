@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { territoriesDto } from 'src/validator/save_edit.territories';
 import { Territories } from './territories.model';
+import { UtilsService } from '../Utils/utils.service';
 
 @Injectable()
 export class TerritoriesService {
     constructor(
         @InjectModel(Territories)
         private territoriesModel: typeof Territories,
+        private readonly utilsService: UtilsService
     ) {}
 
     async getTerritories(user: string): Promise<Territories[]> {
@@ -45,8 +47,8 @@ export class TerritoriesService {
                     }
                 }
             );
-
-            return {message: 'terr is update'};
+            const responce = this.utilsService.getWorldName(params.server);
+            return {message: 'terr is update', ...responce};
         } catch (err) {
             return {error: `update error: ${err}`};
         } 
@@ -64,8 +66,8 @@ export class TerritoriesService {
                 user: user,
                 status: 'active'
             });
-
-            return {message: 'terr is add'};
+            const responce = this.utilsService.getWorldName(params.server);
+            return {message: 'terr is add', ...responce};
         } catch (err) {
             return {error: `add error: ${err}`};
         } 
