@@ -10,10 +10,11 @@ import { LogsService } from '../../logs/logs.service';
 import { Logs } from '../../logs/logs.model';
 import { Regens } from './regens.model';
 import { Tickets } from '../../tickets/tickets.model';
+import { OldUser } from '../../users/old-user.model';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([User, Markers, Territories, Logs, Regens, Tickets]),
+        SequelizeModule.forFeature([User, Markers, Territories, Logs, Regens, Tickets, OldUser]),
         BullModule.registerQueue({
             name: 'users',
         }),

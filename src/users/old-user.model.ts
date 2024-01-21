@@ -1,4 +1,11 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  Model,
+  Table,
+  BelongsTo,
+} from 'sequelize-typescript';
+import { User } from './users.model';
 
 @Table({ tableName: 'old_users' })
 export class OldUser extends Model<OldUser> {
@@ -69,6 +76,9 @@ export class OldUser extends Model<OldUser> {
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
   reapplication: boolean;
+
+  @BelongsTo(() => User, { foreignKey: 'user_id', targetKey: 'user_id' })
+  user: User;
 
   // @HasMany(() => Awards, {foreignKey: 'user_id'})
   // awards: Awards[];

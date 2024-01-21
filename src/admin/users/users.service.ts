@@ -17,6 +17,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../../logs/logs.service';
 import { Regens } from './regens.model';
 import { Tickets } from '../../tickets/tickets.model';
+import { OldUser } from '../../users/old-user.model';
 
 @Injectable()
 export class UserAdminService {
@@ -36,6 +37,8 @@ export class UserAdminService {
     private markersQueue: Queue,
     @InjectModel(Tickets)
     private ticketsModel: typeof Tickets,
+    @InjectModel(OldUser)
+    private oldUserModel: typeof OldUser,
   ) {}
 
   async getUser(params: getUserDto): Promise<User[]> {
@@ -44,6 +47,7 @@ export class UserAdminService {
         { model: this.markersModel },
         { model: this.territoriesModel },
         { model: this.ticketsModel, attributes: { exclude: ['html'] } },
+        { model: this.oldUserModel, attributes: { exclude: ['password'] } },
       ],
       where: {
         [Op.or]: [
@@ -67,6 +71,8 @@ export class UserAdminService {
         'citizenship',
       ],
     });
+
+    console.log(user);
 
     return user;
   }

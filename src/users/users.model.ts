@@ -3,6 +3,7 @@ import { Markers } from '../markers/markers.model';
 import { Awards } from '../awards/awards.model';
 import { Territories } from '../territories/territories.model';
 import { Tickets } from '../tickets/tickets.model';
+import { OldUser } from './old-user.model';
 
 @Table({ tableName: 'users' })
 export class User extends Model<User> {
@@ -58,6 +59,9 @@ export class User extends Model<User> {
 
   @HasMany(() => Tickets, { sourceKey: 'user_id', foreignKey: 'user_id' })
   tickets: Tickets[];
+
+  @HasMany(() => OldUser, {foreignKey: 'user_id', sourceKey: 'user_id'})
+  oldUsers: OldUser[];
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
   immun: boolean;
