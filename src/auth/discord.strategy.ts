@@ -51,12 +51,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
 
   private getRole(id: string, status: number): string {
     if (
-      [
-        '274466897070915584',
-        '502182630238978069',
-        '665215934545395742',
-        '502404476410527745',
-      ].includes(id)
+      JSON.parse(process.env.ADMINS_IDS).includes(id)
     ) {
       return 'admin';
     }
