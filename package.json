@@ -32,6 +32,7 @@
     "@nestjs/sequelize": "^9.0.0",
     "@nestjs/serve-static": "^3.0.0",
     "axios": "0.27.2",
+    "base64-blob": "^1.4.1",
     "bull": "^4.10.4",
     "bullmq": "^3.10.2",
     "class-transformer": "^0.5.1",

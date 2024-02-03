@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FaqModule } from './faq/faq.module'
 import { GoalsModule } from './goals/goals.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
     imports: [
@@ -45,6 +46,7 @@ import { TicketsModule } from './tickets/tickets.module';
         ExternalApiModule,
         UsersModule,
         TerritoriesModule,
+        GalleryModule,
         MarkersModule,
         AwardsModule,
         StatisticsModule,
