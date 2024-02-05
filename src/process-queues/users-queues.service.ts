@@ -55,6 +55,8 @@ export class UsersConsumer {
             await this.removePlayerRole(job.data.id);
 
             await this.deleteUser(job.data.id);
+
+            await this.removeFromMarkersQueue(job.data.id);
         } else if (job.data.action === 'suspend-user') {
             await this.deleteFromWl(job.data.username);
             await job.progress(30);
@@ -253,6 +255,16 @@ export class UsersConsumer {
             },
         });
     }
+
+
+    async removeFromMarkersQueue(id: string): Promise<void> {
+        const job = await this.markersQueue.getJob(
+            `${id}-create-new-user-ticket`,
+        );
+        if (job) {
+            await job.remove();
+        }
+    } 
 
     async changeStatus(id: string, status: string): Promise<void> {
         let statusId = 0;

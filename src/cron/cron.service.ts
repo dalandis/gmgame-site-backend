@@ -129,4 +129,48 @@ export class CronTasksService {
       },
     );
   }
+
+  @Cron('0 0 * * 0', {
+    disabled: false,
+    timeZone: 'Europe/Moscow',
+  })
+  async clearYearsOldUsersRequests() {
+
+    const date = new Date();
+    const dateOneYearOld = date.getFullYear() - 1;
+
+    const oldDeniedUsers = await this.userModel.findAll({
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { updatedAt: null },
+              { updatedAt: { [Op.lt]: dateOneYearOld } },
+            ],
+          },
+          { status: 3 },
+        ],
+      },
+    });
+
+    for (const user of oldDeniedUsers) {
+      await this.userModel.update(            
+        {
+          status: 7,
+          tag: '{}',
+          age: 0,
+          from_about: '',
+          you_about: '',
+          type: 0,
+          username: null,
+          reapplication: false,
+        },
+        {
+          where: {
+            id: user.id
+          }
+        }
+      );  
+    }
+  }
 }
