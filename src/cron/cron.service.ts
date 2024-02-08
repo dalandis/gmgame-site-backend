@@ -135,7 +135,13 @@ export class CronTasksService {
     timeZone: 'Europe/Moscow',
   })
   async clearYearsOldUsersRequests() {
-
+    if (process.env.pm_id !== '2') {
+      return;
+    }
+    if (process.env.NODE_ENV === 'dev') {
+      return;
+    }
+    
     const date = new Date();
     const dateOneYearOld = date.getFullYear() - 1;
 
