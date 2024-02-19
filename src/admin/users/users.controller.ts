@@ -18,6 +18,7 @@ import {
   terrUpdateDto,
   updateUserDto,
   regenActionDto,
+  donateStatusDto,
 } from '../../validator/admin/users-admin';
 import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { RoleGuard } from '../../auth/roles/api-roles';
@@ -239,5 +240,14 @@ export class UserAdminController {
     }
 
     res.send(JSON.stringify(response));
+  }
+  
+  @SetMetadata('role', 'admin')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('/add_donate_status')
+  async addDonateStatus(@Request() req, @Body() body: donateStatusDto, @Response() res): Promise<any> {
+      const message = await this.userAdminService.addDonateStatus(body);
+      console.log(message);
+      res.send(JSON.stringify(message));
   }
 }

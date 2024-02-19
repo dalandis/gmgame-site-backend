@@ -122,3 +122,21 @@ export class regenActionDto {
     @IsString()
     action: string;
 }
+
+export class donateStatusDto {
+    @IsNotEmpty()
+    @IsInt()
+    id: number;
+
+    @IsOptional()
+    @IsInt()
+    current?: number;
+
+    @IsOptional()
+    @IsInt()
+    full?: number;
+
+    @IsOptional()
+    @IsBoolean()
+    viewing?: boolean;
+}

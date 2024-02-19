@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FaqModule } from './faq/faq.module'
 import { GoalsModule } from './goals/goals.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { DonateStatusModule } from './donate-status/donate-status.module';
 
 @Module({
     imports: [
@@ -54,6 +55,7 @@ import { TicketsModule } from './tickets/tickets.module';
         LogsModule,
         CronTasksModule,
         FaqModule,
+        DonateStatusModule,
         GoalsModule,
         TicketsModule,
         ScheduleModule.forRoot(),

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   actionUserDto,
+  donateStatusDto,
   getUserDto,
   markersUpdateDto,
   regenActionDto,
@@ -18,6 +19,7 @@ import { LogsService } from '../../logs/logs.service';
 import { Regens } from './regens.model';
 import { Tickets } from '../../tickets/tickets.model';
 import { OldUser } from '../../users/old-user.model';
+import { DonateStatus } from '../../donate-status/donate-status.model';
 
 @Injectable()
 export class UserAdminService {
@@ -39,6 +41,8 @@ export class UserAdminService {
     private ticketsModel: typeof Tickets,
     @InjectModel(OldUser)
     private oldUserModel: typeof OldUser,
+    @InjectModel(DonateStatus)
+    private donateStatusModel: typeof DonateStatus
   ) {}
 
   async getUser(params: getUserDto): Promise<User[]> {
@@ -549,5 +553,18 @@ export class UserAdminService {
         id: id,
       },
     });
+  }
+
+  async addDonateStatus(params: donateStatusDto): Promise<any> {
+    try {
+        await this.donateStatusModel.create({
+            current: params.current,
+            full: params.full,
+            viewing: params.viewing,
+        });
+        return {message: 'Добавлен сбор денег'};
+    } catch (err) {
+        return {error: `При добавлении возникла ошибка: ${err}`};
+    } 
   }
 }
