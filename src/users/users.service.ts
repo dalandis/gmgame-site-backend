@@ -39,7 +39,7 @@ export class UsersService {
     });
 
     if (user && user.username) {
-      return { error: 'user exist' };
+      return { error: 'Пользователь существует' };
     }
 
     let discordResponse = null;
@@ -52,7 +52,7 @@ export class UsersService {
       );
     } catch (error) {
       console.log(error);
-      return { error: 'discord error' };
+      return { error: 'Ошибка Discord' };
     }
 
     await this.userModel.upsert({
@@ -76,7 +76,7 @@ export class UsersService {
 
     this.sendWebhook(params, discordUser, user?.reapplication );
 
-    return { message: 'user create successful' };
+    return { message: 'Пользователь успешно создан' };
   }
 
   private async sendWebhook(params, discordUser, reapplication = false) {
@@ -135,10 +135,10 @@ export class UsersService {
     );
 
     if (result.status != 200) {
-      return { error: `password is not change: ${result.status}` };
+      return { error: `Ошибка изминения пароля: ${result.status}` };
     }
 
-    return { message: 'password is change' };
+    return { message: 'Пароль изменен' };
   }
 
   async resubmit(reqUser) {
@@ -153,7 +153,7 @@ export class UsersService {
     });
 
     if (!user) {
-      return { error: 'user undefined or denied reapplication' };
+      return { error: 'Пользователь не определен или отклонил повторную заявку' };
     }
 
     await this.oldUserModel.create({
@@ -201,6 +201,6 @@ export class UsersService {
       citizenship: user.citizenship,
     });
 
-    return { message: 'resubmit is change' };
+    return { message: 'Обновлена информация о повторной отправке' };
   }
 }
