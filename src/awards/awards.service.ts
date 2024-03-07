@@ -44,7 +44,7 @@ export class AwardsService {
             });
 
             if (!reward) {
-                return {error: 'Награда не существует'};
+                return {error: 'Награды не существует'};
             }
 
             const payload = {

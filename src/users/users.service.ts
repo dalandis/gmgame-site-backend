@@ -135,7 +135,7 @@ export class UsersService {
     );
 
     if (result.status != 200) {
-      return { error: `Ошибка изминения пароля: ${result.status}` };
+      return { error: `Ошибка изменения пароля: ${result.status}` };
     }
 
     return { message: 'Пароль изменен' };
