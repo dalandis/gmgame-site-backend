@@ -12,7 +12,6 @@ export class TicketsService {
   async closeTicket(data): Promise<Tickets> {
     return this.ticketsModel.create({
       user_id: data.user_id,
-      html: data.html,
       name: data.ticket_id,
     });
   }

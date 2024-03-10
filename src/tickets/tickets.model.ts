@@ -11,9 +11,6 @@ export class Tickets extends Model<Tickets> {
   })
   id: number; //INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
-  @Column({ type: DataType.TEXT('long'), allowNull: false })
-  html: string;
-
   @Column({ type: DataType.STRING, allowNull: false })
   user_id: string;
 

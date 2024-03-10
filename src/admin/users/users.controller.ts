@@ -225,13 +225,13 @@ export class UserAdminController {
 
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
-  @Post('/get_ticket')
+  @Post('/get_link')
   async getTicket(
     @Request() req,
     @Response() res,
-    @Body() body: { id: number },
+    @Body() body: { name: string },
   ): Promise<string> {
-    const response = await this.userAdminService.getTicket(body.id);
+    const response = await this.userAdminService.getLink(body.name);
 
     if (!response) {
       res.send(JSON.stringify({ error: 'Нет тикета' }));

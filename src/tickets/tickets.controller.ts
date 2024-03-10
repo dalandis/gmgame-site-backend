@@ -21,7 +21,7 @@ export class TicketsController {
   async closeTicket(
     @Request() req,
     @Response() res,
-    @Body() body: { ticket_id: string; html: string; user_id: string },
+    @Body() body: { ticket_id: string; user_id: string },
   ): Promise<any> {
     const response = await this.ticketsService.closeTicket(body);
 

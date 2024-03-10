@@ -13,14 +13,24 @@ import { Territories } from '../../territories/territories.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, fn, col } from 'sequelize';
 import { Queue } from 'bull';
+import * as Minio from 'minio';
+import { RedisService } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
+import { ConfigModule } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../../logs/logs.service';
 import { Regens } from './regens.model';
 import { Tickets } from '../../tickets/tickets.model';
 import { OldUser } from '../../users/old-user.model';
 
+ConfigModule.forRoot({
+  envFilePath: '.env.minio',
+});
+
 @Injectable()
 export class UserAdminService {
+  private readonly redis: Redis;
+
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
@@ -39,14 +49,17 @@ export class UserAdminService {
     private ticketsModel: typeof Tickets,
     @InjectModel(OldUser)
     private oldUserModel: typeof OldUser,
-  ) {}
+    private readonly redisService: RedisService,
+  ) {
+    this.redis = this.redisService.getClient();
+  }
 
   async getUser(params: getUserDto): Promise<User[]> {
     const user = await this.userModel.findAll({
       include: [
         { model: this.markersModel },
         { model: this.territoriesModel },
-        { model: this.ticketsModel, attributes: { exclude: ['html'] } },
+        { model: this.ticketsModel },
         { model: this.oldUserModel, attributes: { exclude: ['password'] } },
       ],
       where: {
@@ -543,11 +556,29 @@ export class UserAdminService {
     });
   }
 
-  async getTicket(id: number): Promise<any> {
-    return this.ticketsModel.findOne({
-      where: {
-        id: id,
-      },
+  async getLink(name: string): Promise<any> {
+    let link = await this.redis.get(`gmgame:link:${name}`);
+
+    if (link) {
+      return link;
+    }
+
+    console.log('getLink');
+
+    const minioClient = new Minio.Client({
+      endPoint: process.env.MINIO_END_POINT,
+      port: parseInt(process.env.MINIO_PORT),
+      useSSL: false,
+      accessKey: process.env.MINIO_ACCESS_KEY,
+      secretKey: process.env.MINIO_SECRET_KEY,
     });
+
+    const expiresLink = 60 * 60 * 24 * 7;
+
+    link = await minioClient.presignedGetObject('tikets', name, expiresLink);
+
+    this.redis.set(`gmgame:link:${name}`, link, 'EX', expiresLink);
+
+    return link;
   }
 }

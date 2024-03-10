@@ -27,7 +27,7 @@ export class UsersService {
       where: {
         user_id,
       },
-      attributes: {exclude: ['password']},
+      attributes: { exclude: ['password'] },
     });
   }
 
@@ -74,7 +74,7 @@ export class UsersService {
       citizenship: false,
     });
 
-    this.sendWebhook(params, discordUser, user?.reapplication );
+    this.sendWebhook(params, discordUser, user?.reapplication);
 
     return { message: 'user create successful' };
   }
