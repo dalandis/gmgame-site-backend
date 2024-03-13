@@ -1,4 +1,9 @@
-import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  MiddlewareConsumer,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -21,72 +26,74 @@ import { ProcessQueuesModule } from './process-queues/process-queues.module';
 import { LogsModule } from './logs/logs.module';
 import { CronTasksModule } from './cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { FaqModule } from './faq/faq.module'
+import { FaqModule } from './faq/faq.module';
 import { GoalsModule } from './goals/goals.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
-    imports: [
-        ServeStaticModule.forRoot({
-            rootPath: join(__dirname, '../../..', 'gmgame-site', 'build'),
-            // serveRoot: '/(.*)',
-            // exclude: ['/admin/(.*)'],
-        }),
-        ConfigModule.forRoot({
-            envFilePath: '.env'
-        }),
-        BullModule.forRoot({
-            redis: {
-                host: 'localhost',
-                port: 6379,
-            },
-        }),
-        AuthModule,
-        ExternalApiModule,
-        UsersModule,
-        TerritoriesModule,
-        MarkersModule,
-        AwardsModule,
-        StatisticsModule,
-        ShopsModule,
-        AdminModule,
-        ProcessQueuesModule,
-        LogsModule,
-        CronTasksModule,
-        FaqModule,
-        GoalsModule,
-        TicketsModule,
-        ScheduleModule.forRoot(),
-        SequelizeModule.forRootAsync({
-            useFactory: () => ({
-                dialect: 'mysql',
-                host: process.env.MYSQL_HOST,
-                port: Number(process.env.MYSQL_PORT) || 3306,
-                username: process.env.MYSQL_DB_USER,
-                password: process.env.MYSQL_DB_PASSWORD,
-                database: process.env.MYSQL_DB_NAME,
-                autoLoadModels: true,
-                logging: console.log
-            })
-        }),
-    ],
-    controllers: [AppController, AuthController],
-    providers: [AppService],
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../../..', 'gmgame-site', 'build'),
+      // serveRoot: '/(.*)',
+      // exclude: ['/admin/(.*)'],
+    }),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    AuthModule,
+    ExternalApiModule,
+    UsersModule,
+    TerritoriesModule,
+    MarkersModule,
+    AwardsModule,
+    StatisticsModule,
+    ShopsModule,
+    AdminModule,
+    ProcessQueuesModule,
+    LogsModule,
+    CronTasksModule,
+    FaqModule,
+    GoalsModule,
+    TicketsModule,
+    GalleryModule,
+    ScheduleModule.forRoot(),
+    SequelizeModule.forRootAsync({
+      useFactory: () => ({
+        dialect: 'mysql',
+        host: process.env.MYSQL_HOST,
+        port: Number(process.env.MYSQL_PORT) || 3306,
+        username: process.env.MYSQL_DB_USER,
+        password: process.env.MYSQL_DB_PASSWORD,
+        database: process.env.MYSQL_DB_NAME,
+        autoLoadModels: true,
+        logging: console.log,
+      }),
+    }),
+  ],
+  controllers: [AppController, AuthController],
+  providers: [AppService],
 })
 export class AppModule {}
 
 // export class AppModule implements NestModule {
 
 //     public configure(consumer: MiddlewareConsumer) {
-  
+
 //         consumer.apply(LdapMiddleware).
 //         exclude({path: 'api/', method: RequestMethod.ALL},
 //                 {path: 'auth/google/callback', method: RequestMethod.ALL},
 //                 {path: 'config.json', method: RequestMethod.ALL}).
 //         forRoutes(AppController);
-    
+
 //         consumer.apply(RouteLoggingMiddleware).forRoutes(UsersController);
 //         consumer.apply(RouteLoggingMiddleware).forRoutes(RolesController);
 //     }
-  
+
 //   }
