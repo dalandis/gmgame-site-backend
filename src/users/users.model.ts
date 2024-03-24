@@ -1,4 +1,11 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Markers } from '../markers/markers.model';
 import { Awards } from '../awards/awards.model';
 import { Territories } from '../territories/territories.model';
@@ -60,7 +67,7 @@ export class User extends Model<User> {
   @HasMany(() => Tickets, { sourceKey: 'user_id', foreignKey: 'user_id' })
   tickets: Tickets[];
 
-  @HasMany(() => OldUser, {foreignKey: 'user_id', sourceKey: 'user_id'})
+  @HasMany(() => OldUser, { foreignKey: 'user_id', sourceKey: 'user_id' })
   oldUsers: OldUser[];
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
@@ -89,6 +96,9 @@ export class User extends Model<User> {
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
   reapplication: boolean;
+
+  @BelongsTo(() => User, { foreignKey: 'user_id', targetKey: 'user_id' })
+  user: User;
 
   // @HasMany(() => Awards, {foreignKey: 'user_id'})
   // awards: Awards[];
