@@ -19,10 +19,15 @@ import { UseInterceptors } from '@nestjs/common';
 import * as multer from 'multer';
 import { deleteAproveRejectGalleryDto, galleryDto } from '../validator/gallery';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const fileFilter = (req, file, callback) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/webp') {
+  if (
+    file.mimetype === 'image/jpeg' ||
+    file.mimetype === 'image/webp' ||
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/avif'
+  ) {
     callback(null, true);
   } else {
     callback(new BadRequestException('Invalid file type'), false);
@@ -37,7 +42,7 @@ export class GalleryController {
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/upload_images')
   @UseInterceptors(
-    FilesInterceptor('files', 10, {
+    FilesInterceptor('files', 20, {
       storage: multer.memoryStorage(),
       limits: { fileSize: MAX_FILE_SIZE },
       fileFilter,

@@ -4,6 +4,7 @@ import { Op, where } from 'sequelize';
 import * as Minio from 'minio';
 import { ConfigModule } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import * as sharp from 'sharp';
 import { Gallery } from './gallery.model';
 import { galleryDto } from '../validator/gallery';
 import { User } from '../users/users.model';
@@ -34,32 +35,68 @@ export class GalleryService {
 
   async saveImages(files: Array<Express.Multer.File>): Promise<any> {
     const fileNames = [];
+    const promises = [];
 
     for (const file of files) {
       const metaData = {
         'Content-Type': file.mimetype,
       };
 
-      const uuid = uuidv4();
+      const resizeStreams = this.createResizeStreams(
+        file.buffer,
+        file.mimetype.split('/')[1],
+      );
 
-      await minioClient
-        .putObject(
-          'static',
-          `${file.originalname}-${uuid}`,
-          file.buffer,
-          metaData,
-        )
-        .then((res) => {
-          fileNames.push(
-            `http://msk.gmgame.ru:9000/static/${file.originalname}-${uuid}`,
+      const filename = `${uuidv4()}-${file.originalname}`;
+
+      fileNames.push(`http://msk.gmgame.ru:9000/static/${filename}`);
+
+      promises.push(
+        resizeStreams.map(({ stream, suffix }) => {
+          minioClient.putObject(
+            'static',
+            `${filename}${suffix}`,
+            stream,
+            metaData,
           );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        }),
+      );
     }
 
+    await Promise.all(promises);
+
     return fileNames;
+  }
+
+  private createResizeStreams(file: Buffer, format: any) {
+    const minMipmap = 4;
+    const maxMipmap = 8;
+    const maxWidth = 2560;
+
+    const imageStream = sharp(file).toFormat(format, {
+      quality: 70,
+      progressive: true,
+    });
+
+    const result = [
+      {
+        stream: imageStream
+          .clone()
+          .resize({ width: maxWidth, withoutEnlargement: true }),
+        suffix: '',
+      },
+    ];
+
+    for (let i = minMipmap; i <= maxMipmap; i *= 2) {
+      const width = maxWidth / i;
+
+      result.push({
+        stream: imageStream.clone().resize({ width, withoutEnlargement: true }),
+        suffix: `@${i}`,
+      });
+    }
+
+    return result;
   }
 
   async getGalleries(): Promise<any> {
