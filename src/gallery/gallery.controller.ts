@@ -38,8 +38,8 @@ const fileFilter = (req, file, callback) => {
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
-  @SetMetadata('role', 'player')
-  @UseGuards(AuthenticatedGuard, RoleGuard)
+  // @SetMetadata('role', 'player')
+  // @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/upload_images')
   @UseInterceptors(
     FilesInterceptor('files', 20, {

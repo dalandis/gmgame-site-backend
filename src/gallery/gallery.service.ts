@@ -51,16 +51,18 @@ export class GalleryService {
 
       fileNames.push(`http://msk.gmgame.ru:9000/static/${filename}`);
 
-      promises.push(
-        resizeStreams.map(({ stream, suffix }) => {
+      // promises.push(
+      resizeStreams.map(({ stream, suffix }) => {
+        promises.push(
           minioClient.putObject(
             'static',
             `${filename}${suffix}`,
             stream,
             metaData,
-          );
-        }),
-      );
+          ),
+        );
+      });
+      // );
     }
 
     await Promise.all(promises);
