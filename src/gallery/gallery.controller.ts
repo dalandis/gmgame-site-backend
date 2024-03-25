@@ -125,7 +125,7 @@ export class GalleryController {
 
   @SetMetadata('role', 'player')
   @UseGuards(AuthenticatedGuard, RoleGuard)
-  @Post('get_my_galleries')
+  @Get('get_my_galleries')
   async getMyGalleries(@Request() req, @Response() res) {
     const message = await this.galleryService.getMyGalleries(req.user);
 
