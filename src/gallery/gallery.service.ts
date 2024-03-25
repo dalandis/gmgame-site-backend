@@ -118,7 +118,7 @@ export class GalleryService {
     });
   }
 
-  async createGallery(body: galleryDto, user: User): Promise<any> {
+  async createGallery(body: galleryDto, user): Promise<any> {
     const existGallery = await this.galleryModel.findOne({
       where: {
         name: body.name,
@@ -132,7 +132,7 @@ export class GalleryService {
     const gallery = await this.galleryModel.create({
       name: body.name,
       description: body.description,
-      author: user.user_id,
+      author: user.id,
     });
 
     const galleryImages = [];
@@ -149,7 +149,7 @@ export class GalleryService {
     return { message: 'gallery created' };
   }
 
-  async getGallery(id: number, user: User): Promise<any> {
+  async getGallery(id: number, user): Promise<any> {
     const gallery = await this.galleryModel.findOne({
       where: {
         id,
@@ -166,21 +166,21 @@ export class GalleryService {
       ],
     });
 
-    if (gallery.author !== user?.user_id && !gallery.aprove) {
+    if (gallery.author !== user?.id && !gallery.aprove) {
       return { error: 'not your gallery' };
     }
 
     return gallery;
   }
 
-  async editGallery(body: galleryDto, user: User): Promise<any> {
+  async editGallery(body: galleryDto, user): Promise<any> {
     const gallery = await this.galleryModel.findOne({
       where: {
         id: body.id,
       },
     });
 
-    if (gallery.author !== user.username) {
+    if (gallery.author !== user.id) {
       return { error: 'not your gallery' };
     }
 
@@ -218,14 +218,14 @@ export class GalleryService {
     return { message: 'gallery updated' };
   }
 
-  async deleteGallery(id: number, user: User): Promise<any> {
+  async deleteGallery(id: number, user): Promise<any> {
     const gallery = await this.galleryModel.findOne({
       where: {
         id,
       },
     });
 
-    if (gallery.author !== user.username) {
+    if (gallery.author !== user.id) {
       return { error: 'not your gallery' };
     }
 

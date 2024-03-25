@@ -22,7 +22,7 @@ export class Gallery extends Model<Gallery> {
   @Column({ type: DataType.STRING, allowNull: false })
   author: string;
 
-  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  @Column({ type: DataType.STRING, allowNull: false, unique: 'compositeIndex' })
   name: string;
 
   @Column({ type: DataType.TEXT, allowNull: false })
