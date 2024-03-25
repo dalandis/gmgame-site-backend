@@ -287,4 +287,22 @@ export class GalleryService {
 
     return { message: 'gallery rejected' };
   }
+
+  async getMyGalleries(user): Promise<any> {
+    return this.galleryModel.findAll({
+      where: {
+        author: user.id,
+      },
+      include: [
+        {
+          model: GalleryImages,
+          attributes: ['image'],
+        },
+        {
+          model: User,
+          attributes: ['username'],
+        },
+      ],
+    });
+  }
 }

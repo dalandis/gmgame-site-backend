@@ -38,8 +38,8 @@ const fileFilter = (req, file, callback) => {
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
-  // @SetMetadata('role', 'player')
-  // @UseGuards(AuthenticatedGuard, RoleGuard)
+  @SetMetadata('role', 'player')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/upload_images')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
@@ -49,12 +49,12 @@ export class GalleryController {
     }),
   )
   async uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
-    return this.galleryService.saveImages(files);
+    return await this.galleryService.saveImages(files);
   }
 
   @Get('get_galleries')
   async getGalleries() {
-    return this.galleryService.getGalleries();
+    return await this.galleryService.getGalleries();
   }
 
   @SetMetadata('role', 'player')
@@ -65,21 +65,21 @@ export class GalleryController {
     @Body() body: galleryDto,
     @Response() res,
   ) {
-    const message = this.galleryService.createGallery(body, req.user);
+    const message = await this.galleryService.createGallery(body, req.user);
 
     res.send(JSON.stringify(message));
   }
 
   @Get('get_gallery/:id')
   async getGallery(@Param() params, @Request() req) {
-    return this.galleryService.getGallery(params.id, req.user);
+    return await this.galleryService.getGallery(params.id, req.user);
   }
 
   @SetMetadata('role', 'player')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('edit_gallery')
   async editGallery(@Request() req, @Body() body: galleryDto, @Response() res) {
-    const message = this.galleryService.editGallery(body, req.user);
+    const message = await this.galleryService.editGallery(body, req.user);
 
     res.send(JSON.stringify(message));
   }
@@ -92,7 +92,7 @@ export class GalleryController {
     @Body() body: deleteAproveRejectGalleryDto,
     @Response() res,
   ) {
-    const message = this.galleryService.deleteGallery(body.id, req.user);
+    const message = await this.galleryService.deleteGallery(body.id, req.user);
 
     res.send(JSON.stringify(message));
   }
@@ -105,7 +105,7 @@ export class GalleryController {
     @Body() body: deleteAproveRejectGalleryDto,
     @Response() res,
   ) {
-    const message = this.galleryService.approveGallery(body.id);
+    const message = await this.galleryService.approveGallery(body.id);
 
     res.send(JSON.stringify(message));
   }
@@ -118,7 +118,16 @@ export class GalleryController {
     @Body() body: deleteAproveRejectGalleryDto,
     @Response() res,
   ) {
-    const message = this.galleryService.rejectGallery(body.id);
+    const message = await this.galleryService.rejectGallery(body.id);
+
+    res.send(JSON.stringify(message));
+  }
+
+  @SetMetadata('role', 'player')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('get_my_galleries')
+  async getMyGalleries(@Request() req, @Response() res) {
+    const message = await this.galleryService.getMyGalleries(req.user);
 
     res.send(JSON.stringify(message));
   }
