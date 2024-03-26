@@ -32,7 +32,7 @@ export class TerritoriesController {
 
         if (!terr) {
             res.status(HttpStatus.NO_CONTENT).json({
-                message: 'Territory not found'
+                message: 'Территория не найдена'
             });
             return;
         }

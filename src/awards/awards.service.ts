@@ -44,7 +44,7 @@ export class AwardsService {
             });
 
             if (!reward) {
-                return {error: 'reward not exist'};
+                return {error: 'Награды не существует'};
             }
 
             const payload = {
@@ -55,7 +55,7 @@ export class AwardsService {
             const result = await this.dataProviderService.sendToServerApi(payload, 'casino_new', 'POST');
             
             if (result.status != 200) {
-                return {error: `reward is not give: ${result.status}`};
+                return {error: `Награда не выдана: ${result.status}`};
             }
 
             await this.awardsModel.update(
@@ -74,9 +74,9 @@ export class AwardsService {
             const dataDiscord = `Поздравляем, ${reward.user.username}! Выигрыш ${result.data.prize}`;
             this.dataProviderService.sendDiscordWebHook(dataDiscord, 'Yakubovich');
 
-            return {message: 'reward is give'};
+            return {message: 'Награда выдана'};
         } catch (err) {
-            return {error: `update error: ${err}`};
+            return {error: `Ошибка при выдаче награды: ${err}`};
         } 
     }
 }

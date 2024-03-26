@@ -20,7 +20,7 @@ export class CitizenshipConsumer {
         const response = await this.dataProviderService.sendToBot(job.data, 'citizenship_update', 'POST');
 
         if (response.status != 200) {
-            throw new Error(`Error while refreshing citizenship, error: ${response}`);
+            throw new Error(`Ошибка при обновлении гражданства, error: ${response}`);
         }
 
         await job.progress(100);

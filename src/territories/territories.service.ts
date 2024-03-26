@@ -48,9 +48,9 @@ export class TerritoriesService {
                 }
             );
             const responce = this.utilsService.getWorldName(params.server);
-            return {message: 'terr is update', ...responce};
+            return {message: 'Территория обновлена', ...responce};
         } catch (err) {
-            return {error: `update error: ${err}`};
+            return {error: `Ошибка при обновлении территории: ${err}`};
         } 
     }
 
@@ -67,9 +67,9 @@ export class TerritoriesService {
                 status: 'active'
             });
             const responce = this.utilsService.getWorldName(params.server);
-            return {message: 'terr is add', ...responce};
+            return {message: 'Территория добавлена', ...responce};
         } catch (err) {
-            return {error: `add error: ${err}`};
+            return {error: `Ошибка при добавлении территории: ${err}`};
         } 
     }
 
@@ -82,9 +82,9 @@ export class TerritoriesService {
                 }
             });
 
-            return {message: 'delete is add'};
+            return {message: 'Территория удалена'};
         } catch (err) {
-            return {error: `delete error: ${err}`};
+            return {error: `Ошибка при удалении территории: ${err}`};
         } 
     }
 }
