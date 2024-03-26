@@ -128,7 +128,7 @@ export class GalleryService {
     });
 
     if (existGallery) {
-      return { error: 'gallery exist' };
+      return { error: 'Пост с таким названием уже существует' };
     }
 
     const gallery = await this.galleryModel.create({
@@ -148,7 +148,7 @@ export class GalleryService {
 
     await this.galleryImagesModel.bulkCreate(galleryImages);
 
-    return { message: 'gallery created' };
+    return { message: 'Пост создан' };
   }
 
   async getGallery(id: number, user): Promise<any> {
@@ -169,7 +169,7 @@ export class GalleryService {
     });
 
     if (gallery.author !== user?.id && !gallery.aprove) {
-      return { error: 'not your gallery' };
+      return { error: 'Это не твой пост' };
     }
 
     return gallery;
@@ -183,7 +183,7 @@ export class GalleryService {
     });
 
     if (gallery.author !== user.id) {
-      return { error: 'not your gallery' };
+      return { error: 'Это не твой пост' };
     }
 
     await this.galleryModel.update(
@@ -217,7 +217,7 @@ export class GalleryService {
 
     await this.galleryImagesModel.bulkCreate(galleryImages);
 
-    return { message: 'gallery updated' };
+    return { message: 'Пост обновлен' };
   }
 
   async deleteGallery(id: number, user): Promise<any> {
@@ -228,7 +228,7 @@ export class GalleryService {
     });
 
     if (gallery.author !== user.id) {
-      return { error: 'not your gallery' };
+      return { error: 'Это не твой пост' };
     }
 
     await this.galleryModel.destroy({
@@ -243,7 +243,7 @@ export class GalleryService {
       },
     });
 
-    return { message: 'gallery deleted' };
+    return { message: 'Пост удалён' };
   }
 
   async approveGallery(id: number): Promise<any> {
@@ -264,7 +264,7 @@ export class GalleryService {
       },
     );
 
-    return { message: 'gallery approved' };
+    return { message: 'Пост опубликован' };
   }
 
   async rejectGallery(id: number): Promise<any> {
@@ -285,7 +285,7 @@ export class GalleryService {
       },
     );
 
-    return { message: 'gallery rejected' };
+    return { message: 'Пост отключён' };
   }
 
   async getMyGalleries(user): Promise<any> {
@@ -293,6 +293,21 @@ export class GalleryService {
       where: {
         author: user.id,
       },
+      include: [
+        {
+          model: GalleryImages,
+          attributes: ['image'],
+        },
+        {
+          model: User,
+          attributes: ['username'],
+        },
+      ],
+    });
+  }
+
+  async getAllGalleries(): Promise<any> {
+    return this.galleryModel.findAll({
       include: [
         {
           model: GalleryImages,

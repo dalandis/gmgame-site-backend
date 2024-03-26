@@ -131,4 +131,11 @@ export class GalleryController {
 
     res.send(JSON.stringify(message));
   }
+
+  @SetMetadata('role', 'admin')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Get('get_all_galleries')
+  async getAllGalleries() {
+    return await this.galleryService.getAllGalleries();
+  }
 }
