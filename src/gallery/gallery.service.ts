@@ -17,7 +17,7 @@ ConfigModule.forRoot({
 const minioClient = new Minio.Client({
   endPoint: process.env.MINIO_END_POINT,
   port: parseInt(process.env.MINIO_PORT),
-  useSSL: false,
+  useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
 });
@@ -49,7 +49,7 @@ export class GalleryService {
 
       const filename = `${uuidv4()}-${file.originalname}`;
 
-      fileNames.push(`http://msk.gmgame.ru:9000/static/${filename}`);
+      fileNames.push(`https://static.gmgame.ru/static/${filename}`);
 
       // promises.push(
       resizeStreams.map(({ stream, suffix }) => {
