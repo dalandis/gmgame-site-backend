@@ -82,9 +82,9 @@ export class MarkersService {
                 manager.id
             );
 
-            return {message: 'marker is update'};
+            return {message: 'Маркер обновлен'};
         } catch (err) {
-            return {error: `update error: ${err}`};
+            return {error: `Ошибка при обновлении маркера: ${err}`};
         }
     }
 
@@ -112,9 +112,9 @@ export class MarkersService {
                 manager.id
             );
 
-            return {message: 'marker is add'};
+            return {message: 'Маркер добавлен'};
         } catch (err) {
-            return {error: `add error: ${err}`};
+            return {error: `Ошибка при добавлении маркера: ${err}`};
         } 
     }
 
@@ -145,9 +145,9 @@ export class MarkersService {
                 manager.id
             );
 
-            return {message: 'delete'};
+            return {message: 'Маркер удален'};
         } catch (err) {
-            return {error: `delete error: ${err}`};
+            return {error: `Ошибка при удалении маркера: ${err}`};
         } 
     }
 
