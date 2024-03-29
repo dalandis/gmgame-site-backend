@@ -28,7 +28,7 @@ export class User extends Model<User> {
   @Column({ type: DataType.STRING, allowNull: true })
   password: string; //VARCHAR(100) NOT NULL,
 
-  @Column({ type: DataType.JSON, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   tag: string; //VARCHAR(1000),
 
   @Column({ type: DataType.INTEGER, allowNull: false })
