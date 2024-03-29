@@ -6,7 +6,7 @@ export class Logs extends Model<Logs> {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number; //INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.TEXT, allowNull: false })
     log: string;
 
     @Column({ type: DataType.STRING, allowNull: false })
