@@ -41,6 +41,10 @@ export class UtilsService {
                 return 'Бан на сервере';
             case 5:
                 return 'Не активный игрок';
+            case 6:
+                return 'Новый пустой пользователь';
+            case 7:
+                return 'Старый отклоненный пользователь';
             default:
                 return 'Новая заявка';
         }
