@@ -38,8 +38,8 @@ const fileFilter = (req, file, callback) => {
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
-  @SetMetadata('role', 'player')
-  @UseGuards(AuthenticatedGuard, RoleGuard)
+  // @SetMetadata('role', 'player')
+  // @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/upload_images')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
@@ -60,11 +60,7 @@ export class GalleryController {
   @SetMetadata('role', 'player')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/create_gallery')
-  async createGallery(
-    @Request() req,
-    @Body() body: galleryDto,
-    @Response() res,
-  ) {
+  async createGallery(@Request() req, @Body() body: galleryDto, @Response() res) {
     const message = await this.galleryService.createGallery(body, req.user);
 
     res.send(JSON.stringify(message));
@@ -87,11 +83,7 @@ export class GalleryController {
   @SetMetadata('role', 'player')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('delete_gallery')
-  async deleteGallery(
-    @Request() req,
-    @Body() body: deleteAproveRejectGalleryDto,
-    @Response() res,
-  ) {
+  async deleteGallery(@Request() req, @Body() body: deleteAproveRejectGalleryDto, @Response() res) {
     const message = await this.galleryService.deleteGallery(body.id, req.user);
 
     res.send(JSON.stringify(message));
@@ -113,11 +105,7 @@ export class GalleryController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('reject_gallery')
-  async rejectGallery(
-    @Request() req,
-    @Body() body: deleteAproveRejectGalleryDto,
-    @Response() res,
-  ) {
+  async rejectGallery(@Request() req, @Body() body: deleteAproveRejectGalleryDto, @Response() res) {
     const message = await this.galleryService.rejectGallery(body.id);
 
     res.send(JSON.stringify(message));

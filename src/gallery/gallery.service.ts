@@ -42,27 +42,25 @@ export class GalleryService {
         'Content-Type': file.mimetype,
       };
 
-      const resizeStreams = this.createResizeStreams(
-        file.buffer,
-        file.mimetype.split('/')[1],
-      );
+      const resizeStreams = this.createResizeStreams(file.buffer, file.mimetype.split('/')[1]);
 
       const filename = `${uuidv4()}-${file.originalname}`;
 
       fileNames.push(`https://static.gmgame.ru/static/${filename}`);
 
-      // promises.push(
       resizeStreams.map(({ stream, suffix }) => {
         promises.push(
-          minioClient.putObject(
-            'static',
-            `${filename}${suffix}`,
-            stream,
-            metaData,
-          ),
+          new Promise<void>(async (resolve, reject) => {
+            try {
+              await minioClient.putObject('static', `${filename}${suffix}`, stream, metaData);
+              resolve();
+            } catch (error) {
+              console.error(`Error uploading file ${filename}${suffix}:`, error);
+              reject(error);
+            }
+          }),
         );
       });
-      // );
     }
 
     await Promise.all(promises);
@@ -75,16 +73,20 @@ export class GalleryService {
     const maxMipmap = 8;
     const maxWidth = 2560;
 
-    const imageStream = sharp(file).toFormat(format, {
-      quality: 70,
-      progressive: true,
-    });
+    let imageStream = sharp(file);
+
+    if (['jpeg', 'webp', 'avif'].indexOf(format)) {
+      imageStream = imageStream.toFormat(format, {
+        quality: 70,
+        progressive: true,
+      });
+    } else {
+      imageStream = imageStream.toFormat(format);
+    }
 
     const result = [
       {
-        stream: imageStream
-          .clone()
-          .resize({ width: maxWidth, withoutEnlargement: true }),
+        stream: imageStream.clone().resize({ width: maxWidth, withoutEnlargement: true }),
         suffix: '',
       },
     ];
@@ -168,7 +170,7 @@ export class GalleryService {
       ],
     });
 
-    if (gallery.author !== user?.id && !gallery.aprove) {
+    if (gallery?.author !== user?.id && !gallery.aprove) {
       return { error: 'Это не твой пост' };
     }
 
