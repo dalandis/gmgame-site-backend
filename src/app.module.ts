@@ -1,9 +1,4 @@
-import {
-  Module,
-  MiddlewareConsumer,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -73,7 +68,13 @@ import { GalleryModule } from './gallery/gallery.module';
         password: process.env.MYSQL_DB_PASSWORD,
         database: process.env.MYSQL_DB_NAME,
         autoLoadModels: true,
+        synchronize: false,
         logging: console.log,
+        timezone: '+03:00',
+        define: {
+          charset: 'utf8mb4',
+          collate: 'utf8mb4_unicode_ci',
+        },
       }),
     }),
   ],
