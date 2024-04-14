@@ -55,7 +55,7 @@ export class GalleryService {
               await minioClient.putObject('static', `${filename}${suffix}`, stream, metaData);
               resolve();
             } catch (error) {
-              console.error(`Error uploading file ${filename}${suffix}:`, error);
+              console.error(`Ошибка при загрузке файла ${filename}${suffix}:`, error);
               reject(error);
             }
           }),
@@ -65,7 +65,7 @@ export class GalleryService {
 
     await Promise.all(promises);
 
-    return fileNames;
+    return {success: true,  data: fileNames};
   }
 
   private createResizeStreams(file: Buffer, format: any) {
