@@ -11,6 +11,8 @@ import { Territories } from '../territories/territories.model';
 import { BullModule } from '@nestjs/bull';
 import { OldUser } from './old-user.model';
 import { Gallery } from '../gallery/gallery.model';
+import { LogsService } from '../logs/logs.service';
+import { Logs } from '../logs/logs.model';
 
 @Module({
   imports: [
@@ -21,13 +23,14 @@ import { Gallery } from '../gallery/gallery.model';
       Territories,
       OldUser,
       Gallery,
+      Logs,
     ]),
     BullModule.registerQueue({
       name: 'users',
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, UtilsService, DataProviderService],
+  providers: [UsersService, UtilsService, DataProviderService, LogsService],
   exports: [UsersService],
 })
 export class UsersModule {}
