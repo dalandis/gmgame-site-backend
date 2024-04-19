@@ -39,3 +39,10 @@ export class ChangePasswordDto {
     @IsString()
     password: string
 }
+
+export class ChangeNameDto {
+    @IsNotEmpty()
+    @MaxLength(16)
+    @Matches('^[a-zA-Z0-9_]+$')
+    username: string;
+}

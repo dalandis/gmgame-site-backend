@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { CreateUserDto, ChangePasswordDto } from '../validator/create.user';
+import { CreateUserDto, ChangePasswordDto, ChangeNameDto } from '../validator/create.user';
 import { UtilsService } from '../Utils/utils.service';
 import { RoleGuard } from '../auth/roles/api-roles';
 
@@ -67,6 +67,19 @@ export class UsersController {
     @Response() res,
   ): Promise<any> {
     const message = await this.usersService.changePassword(body, req.user);
+
+    res.send(JSON.stringify(message));
+  }
+
+  @SetMetadata('role', 'player')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('/change_name')
+  async changeName(
+    @Request() req,
+    @Body() body: ChangeNameDto,
+    @Response() res,
+  ): Promise<any> {
+    const message = await this.usersService.changeName(body, req.user);
 
     res.send(JSON.stringify(message));
   }

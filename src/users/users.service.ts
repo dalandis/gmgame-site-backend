@@ -8,6 +8,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { OldUser } from './old-user.model';
 import { IsNull } from 'sequelize-typescript';
+import { LogsService } from '../logs/logs.service';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,7 @@ export class UsersService {
     private readonly utilsService: UtilsService,
     @InjectQueue('users')
     private usersQueue: Queue,
+    private logsService: LogsService,
   ) {}
 
   async getUser(user_id: string): Promise<User> {
@@ -139,6 +141,33 @@ export class UsersService {
     }
 
     return { message: 'Пароль изменен' };
+  }
+
+  async changeName(params, user) {
+    const log = 'Пользователь сменил свое имя: ' + user.localuser.username + ' => ' + params.username;
+
+    await this.logsService
+    .logger(
+      log,
+      `user-change-username`,
+      user.id,
+      user.localuser.username,
+      user.id,
+    )
+    .catch((err) => console.log(err));
+
+    await this.userModel.update(
+      {
+        username: params.username,
+      },
+      {
+        where: {
+          user_id: user.id,
+        },
+      },
+    );
+
+    return { message: 'Имя изменено' };
   }
 
   async resubmit(reqUser) {
