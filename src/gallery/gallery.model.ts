@@ -28,6 +28,18 @@ export class Gallery extends Model<Gallery> {
   @Column({ type: DataType.TEXT, allowNull: false })
   description: string;
 
+  @Column({ type: DataType.STRING, allowNull: false })
+  visit: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  world: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  branch: string;
+  
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  coordinates: number;
+
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   aprove: boolean;
 

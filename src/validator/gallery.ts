@@ -20,6 +20,19 @@ export class galleryDto {
   @IsString()
   description: string;
 
+  @IsString()
+  visit: string;
+
+  @IsString()
+  world: string;
+
+  @IsString()
+  branch: string;
+
+  @Type(() => Number)
+  @IsInt()
+  coordinates: number;
+
   @IsNotEmpty()
   @Type(() => String)
   @IsString({ each: true })

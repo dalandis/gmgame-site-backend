@@ -137,6 +137,10 @@ export class GalleryService {
       name: body.name,
       description: body.description,
       author: user.id,
+      visit: body.visit,
+      world: body.world,
+      branch: body.branch,
+      coordinates: body.coordinates,
     });
 
     const galleryImages = [];
@@ -194,6 +198,10 @@ export class GalleryService {
         description: body.description,
         aprove: false,
         warning: false,
+        visit: body.visit,
+        world: body.world,
+        branch: body.branch,
+        coordinates: body.coordinates,
       },
       {
         where: {
@@ -308,6 +316,7 @@ export class GalleryService {
     });
   }
 
+  // это используется админкою, надо удалить
   async getAllGalleries(): Promise<any> {
     return this.galleryModel.findAll({
       include: [
