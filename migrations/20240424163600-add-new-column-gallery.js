@@ -9,7 +9,7 @@ module.exports = {
         'visit', // new field name
         {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
       ),
       queryInterface.addColumn(
@@ -17,7 +17,7 @@ module.exports = {
         'world', // new field name
         {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
       ),
       queryInterface.addColumn(
@@ -25,15 +25,15 @@ module.exports = {
         'branch', // new field name
         {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
       ),
       queryInterface.addColumn(
         'gallery', // table name
         'coordinates', // new field name
         {
-          type: Sequelize.STRING,
-          allowNull: false,
+          type: Sequelize.INTEGER,
+          allowNull: true,
         },
       ),
     ]);
