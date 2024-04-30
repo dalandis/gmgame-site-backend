@@ -13,8 +13,7 @@ export class AuthController {
   @Get('/callback')
   discordAuthCallback(@Request() req, @Response() res) {
     if (req.user) {
-      let returnTo = new URL(req.session.returnTo).pathname || '/cab/profile';
-      console.log('wjkfbwkfjwebjkfwbfbjkwefbwef', returnTo);
+      let returnTo = req.session.returnTo ? new URL(req.session.returnTo).pathname : '/cab/profile';
       returnTo = returnTo === '/' ? '/cab/profile' : returnTo;
       delete req.session.returnTo;
       res.redirect(returnTo);
@@ -25,8 +24,8 @@ export class AuthController {
 
   @Post('/logout')
   logout(@Request() req, @Response() res, @Next() next) {
-    req.logout();
-
+    // req.logout();
+    req.session.passport = null;
     req.session.destroy();
     return res.send({ authenticated: req.isAuthenticated() });
   }

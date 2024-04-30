@@ -22,7 +22,7 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Описание 
+## Описание
 
 Бэкенд сайта gmgame
 
@@ -35,6 +35,7 @@ $ npm i
 Установить mysql
 
 Создать базу и пользователя
+
 ```bash
 create database dbname character set utf8;
 create user 'dbuser'@'localhost' identified by 'userpassword';
@@ -44,6 +45,7 @@ grant all privileges on dbname.* to 'dbuser'@'localhost';
 ## Конфигурация
 
 .env
+
 ```bash
 MYSQL_HOST=localhost
 MYSQL_DB_NAME=gmgame_test
@@ -52,6 +54,7 @@ MYSQL_DB_PASSWORD=111111111
 ```
 
 .env.discord
+
 ```bash
 SECRET_SESSION='kljb;wknf;lkmdlcmwiofhwuihrpfhfonds;lkcsdmsdljds'
 AUTH_CLIENT_ID=1234567891
@@ -83,4 +86,5 @@ npx sequelize-cli db:migrate --url 'mysql://dbuser:password@127.0.0.1/dbname'
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
 # gmgame-site-backend

@@ -1,30 +1,30 @@
-import {IsDate, IsInt, IsNotEmpty, IsOptional, IsString, isString} from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty, IsOptional, IsString, isString } from 'class-validator';
 
 export class saveGoalsDto {
-    @IsNotEmpty()
-    @IsInt()
-    id: number;
+  @IsNotEmpty()
+  @IsInt()
+  id: number;
 
-    @IsNotEmpty()
-    @IsString()
-    title: string;
+  @IsNotEmpty()
+  @IsString()
+  title: string;
 
-    @IsNotEmpty()
-    @IsString()
-    description: string;
+  @IsNotEmpty()
+  @IsString()
+  description: string;
 
-    @IsNotEmpty()
-    @IsInt()
-    archived: boolean;
+  @IsNotEmpty()
+  @IsInt()
+  archived: boolean;
 
-    @IsDate()
-    endTime: Date;
+  @IsDate()
+  endTime: Date;
 
-    @IsNotEmpty()
-    @IsInt()
-    accum: number;
+  @IsNotEmpty()
+  @IsInt()
+  accum: number;
 
-    @IsNotEmpty()
-    @IsInt()
-    goal: number;
+  @IsNotEmpty()
+  @IsInt()
+  goal: number;
 }

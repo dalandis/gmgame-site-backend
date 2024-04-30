@@ -9,7 +9,7 @@ import {
 } from '../../validator/admin/users-admin';
 import { Queue } from 'bull';
 import * as Minio from 'minio';
-import { RedisService } from '@liaoliaots/nestjs-redis';
+import { RedisService } from '@songkeys/nestjs-redis';
 import Redis from 'ioredis';
 import { ConfigModule } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
@@ -40,7 +40,10 @@ export class UserAdminService {
   async getUser(params: getUserDto): Promise<Omit<users, 'password'>[]> {
     const users = await this.prismaService.users.findMany({
       where: {
-        OR: [{ user_id: params.searchParam }, { username: { contains: params.searchParam } }],
+        OR: [
+          { user_id: params.searchParam },
+          { username: { contains: params.searchParam, mode: 'insensitive' } },
+        ],
       },
       include: {
         markers: true,

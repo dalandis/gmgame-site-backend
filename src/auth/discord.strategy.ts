@@ -22,6 +22,7 @@ const config = {
   clientSecret: process.env.AUTH_CLIENT_SECRET,
   callbackURL: process.env.AUTH_CALLBACK,
   scope: ['identify', 'email'],
+  keepSessionInfo: true,
 };
 
 @Injectable()

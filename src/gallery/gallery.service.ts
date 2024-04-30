@@ -39,11 +39,19 @@ export class GalleryService {
 
       fileNames.push(`https://static.gmgame.ru/static/${filename}`);
 
-      resizeStreams.map(({ stream, suffix }) => {
+      resizeStreams.map(async ({ stream, suffix }) => {
+        const sizeStream = await stream.toBuffer().then((data) => data.length);
+
         promises.push(
           new Promise<void>(async (resolve, reject) => {
             try {
-              await minioClient.putObject('static', `${filename}${suffix}`, stream, metaData);
+              await minioClient.putObject(
+                'static',
+                `${filename}${suffix}`,
+                stream,
+                sizeStream,
+                metaData,
+              );
               resolve();
             } catch (error) {
               console.error(`Ошибка при загрузке файла ${filename}${suffix}:`, error);

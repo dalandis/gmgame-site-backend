@@ -10,8 +10,7 @@ export class LoginGuard extends AuthGuard('discord') {
     }
 
     const result = (await super.canActivate(context)) as boolean;
-    // const req = context.switchToHttp().getRequest();
-    // request.session.returnTo = req.headers.returnTo;
+
     await super.logIn(request);
     return result;
   }

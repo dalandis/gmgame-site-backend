@@ -1,13 +1,4 @@
-import {
-  Controller,
-  UseGuards,
-  Request,
-  Response,
-  Post,
-  Body,
-  HttpStatus,
-  SetMetadata,
-} from '@nestjs/common';
+import { Controller, UseGuards, Request, Response, Post, Body, SetMetadata } from '@nestjs/common';
 import { UserAdminService } from './users.service';
 import {
   getUserDto,
@@ -31,11 +22,7 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/get_user')
-  async getUser(
-    @Request() req,
-    @Response() res,
-    @Body() body: getUserDto,
-  ): Promise<string> {
+  async getUser(@Request() req, @Response() res, @Body() body: getUserDto): Promise<string> {
     const response = await this.userAdminService.getUser(body);
 
     if (!response) {
@@ -77,11 +64,7 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/action_user')
-  async actionUser(
-    @Request() req,
-    @Response() res,
-    @Body() body: actionUserDto,
-  ): Promise<void> {
+  async actionUser(@Request() req, @Response() res, @Body() body: actionUserDto): Promise<void> {
     const response = await this.userAdminService.actionUser(body, req.user);
 
     res.send(JSON.stringify(response));
@@ -90,15 +73,8 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/delete_marker')
-  async deleteMarker(
-    @Request() req,
-    @Response() res,
-    @Body() body: markersDto,
-  ): Promise<void> {
-    const response = await this.userAdminService.deleteMarker(
-      body.id,
-      req.user,
-    );
+  async deleteMarker(@Request() req, @Response() res, @Body() body: markersDto): Promise<void> {
+    const response = await this.userAdminService.deleteMarker(body.id, req.user);
 
     res.send(JSON.stringify(response));
   }
@@ -119,11 +95,7 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/get_logs')
-  async getLogs(
-    @Request() req,
-    @Response() res,
-    @Body() body: logsDto,
-  ): Promise<string> {
+  async getLogs(@Request() req, @Response() res, @Body() body: logsDto): Promise<string> {
     const response = await this.userAdminService.getLogs(body.id);
 
     if (!response) {
@@ -142,10 +114,7 @@ export class UserAdminController {
     @Response() res,
     @Body() body: terrUpdateDto,
   ): Promise<void> {
-    const response = await this.userAdminService.updateTerritory(
-      body,
-      req.user,
-    );
+    const response = await this.userAdminService.updateTerritory(body, req.user);
 
     res.send(JSON.stringify(response));
   }
@@ -153,15 +122,8 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/delete_territory')
-  async deleteTerritory(
-    @Request() req,
-    @Response() res,
-    @Body() body: markersDto,
-  ): Promise<void> {
-    const response = await this.userAdminService.deleteTerritory(
-      body.id,
-      req.user,
-    );
+  async deleteTerritory(@Request() req, @Response() res, @Body() body: markersDto): Promise<void> {
+    const response = await this.userAdminService.deleteTerritory(body.id, req.user);
 
     res.send(JSON.stringify(response));
   }
@@ -185,11 +147,7 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/update_user')
-  async updateUser(
-    @Request() req,
-    @Response() res,
-    @Body() body: updateUserDto,
-  ): Promise<void> {
+  async updateUser(@Request() req, @Response() res, @Body() body: updateUserDto): Promise<void> {
     const response = await this.userAdminService.updateUser(body, req.user);
 
     res.send(JSON.stringify(response));
@@ -199,11 +157,7 @@ export class UserAdminController {
   @SetMetadata('role', 'admin')
   @UseGuards(AuthenticatedGuard, RoleGuard)
   @Post('/regen_action')
-  async regenAction(
-    @Request() req,
-    @Response() res,
-    @Body() body: regenActionDto,
-  ): Promise<void> {
+  async regenAction(@Request() req, @Response() res, @Body() body: regenActionDto): Promise<void> {
     const response = await this.userAdminService.regenAction(body, req.user);
 
     res.send(JSON.stringify(response));

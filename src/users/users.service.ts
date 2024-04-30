@@ -31,7 +31,10 @@ export class UsersService {
   async addUser(params: CreateUserDto, discordUser): Promise<Record<string, string>> {
     const user = await this.prismaService.users.findFirst({
       where: {
-        OR: [{ user_id: discordUser.id }, { username: params.login }],
+        OR: [
+          { user_id: discordUser.id },
+          { username: { equals: params.login, mode: 'insensitive' } },
+        ],
       },
     });
 
