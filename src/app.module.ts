@@ -25,6 +25,7 @@ import { FaqModule } from './faq/faq.module';
 import { GoalsModule } from './goals/goals.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { GalleryModule } from './gallery/gallery.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { GalleryModule } from './gallery/gallery.module';
         },
       }),
     }),
+    PrismaModule,
   ],
   controllers: [AppController, AuthController],
   providers: [AppService],

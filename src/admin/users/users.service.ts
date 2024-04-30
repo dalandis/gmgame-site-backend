@@ -7,21 +7,15 @@ import {
   terrUpdateDto,
   updateUserDto,
 } from '../../validator/admin/users-admin';
-import { User } from '../../users/users.model';
-import { Markers } from '../../markers/markers.model';
-import { Territories } from '../../territories/territories.model';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op, fn, col } from 'sequelize';
 import { Queue } from 'bull';
 import * as Minio from 'minio';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { ConfigModule } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
+import { users, markers, territories } from '@prisma/client';
 import { LogsService } from '../../logs/logs.service';
-import { Regens } from './regens.model';
-import { Tickets } from '../../tickets/tickets.model';
-import { OldUser } from '../../users/old-user.model';
+import { PrismaService } from '../../prisma/prisma.service';
 
 ConfigModule.forRoot({
   envFilePath: '.env.minio',
@@ -32,107 +26,59 @@ export class UserAdminService {
   private readonly redis: Redis;
 
   constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
-    @InjectModel(Markers)
-    private markersModel: typeof Markers,
-    @InjectModel(Territories)
-    private territoriesModel: typeof Territories,
     @InjectQueue('users')
     private usersQueue: Queue,
     private logsService: LogsService,
-    @InjectModel(Regens)
-    private regensModel: typeof Regens,
     @InjectQueue('markers')
     private markersQueue: Queue,
-    @InjectModel(Tickets)
-    private ticketsModel: typeof Tickets,
-    @InjectModel(OldUser)
-    private oldUserModel: typeof OldUser,
     private readonly redisService: RedisService,
+    private readonly prismaService: PrismaService,
   ) {
     this.redis = this.redisService.getClient();
   }
 
-  async getUser(params: getUserDto): Promise<User[]> {
-    const user = await this.userModel.findAll({
-      include: [
-        { model: this.markersModel },
-        { model: this.territoriesModel },
-        { model: this.ticketsModel },
-        { model: this.oldUserModel, attributes: { exclude: ['password'] } },
-      ],
+  async getUser(params: getUserDto): Promise<Omit<users, 'password'>[]> {
+    const users = await this.prismaService.users.findMany({
       where: {
-        [Op.or]: [
-          { user_id: params.searchParam },
-          { username: { [Op.like]: `%${params.searchParam}%` } },
-        ],
+        OR: [{ user_id: params.searchParam }, { username: { contains: params.searchParam } }],
       },
-      attributes: [
-        'username',
-        'status',
-        'tag',
-        'type',
-        'user_id',
-        'age',
-        'from_about',
-        'you_about',
-        'partner',
-        'immun',
-        'note',
-        'expiration_date',
-        'citizenship',
-      ],
+      include: {
+        markers: true,
+        territories: true,
+        tickets: true,
+        oldUsers: {
+          omit: { password: true },
+        },
+      },
+      omit: { password: true },
     });
 
-    console.log(user);
-
-    return user;
+    return users;
   }
 
-  async getMarkers(): Promise<Markers[]> {
-    return this.markersModel.findAll({
-      include: [
-        {
-          model: this.userModel,
-          attributes: [],
+  async getMarkers(): Promise<markers[]> {
+    return this.prismaService.markers.findMany({
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
+          },
         },
-      ],
-      attributes: [
-        'id',
-        'id_type',
-        'x',
-        'y',
-        'z',
-        'name',
-        'description',
-        'user',
-        'server',
-        'flag',
-        [col('player.username'), 'username'],
-      ],
+      },
     });
   }
 
-  async getTerritories(): Promise<Territories[]> {
-    return this.territoriesModel.findAll({
-      include: [
-        {
-          model: this.userModel,
-          attributes: [],
+  async getTerritories(): Promise<territories[]> {
+    return this.prismaService.territories.findMany({
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
+          },
         },
-      ],
-      attributes: [
-        'id',
-        'xStart',
-        'zStart',
-        'xStop',
-        'zStop',
-        'name',
-        'user',
-        'world',
-        [col('player.username'), 'username'],
-      ],
+      },
     });
   }
 
@@ -140,20 +86,25 @@ export class UserAdminService {
     params: actionUserDto,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const user = await this.userModel.findOne({
+    const user = await this.prismaService.users.findUnique({
       where: {
         user_id: params.user,
       },
-      attributes: ['username', 'status', 'tag', 'type', 'user_id', 'age'],
+      select: {
+        username: true,
+        status: true,
+        tag: true,
+        type: true,
+        user_id: true,
+        age: true,
+      },
     });
 
     if (!user) {
       return { error: true, message: 'Пользователь не найден' };
     }
 
-    const job = await this.usersQueue.getJob(
-      `${user.user_id}-${params.action}`,
-    );
+    const job = await this.usersQueue.getJob(`${user.user_id}-${params.action}`);
 
     if (job && job.data.action === `${params.action}-user`) {
       return { error: true, message: 'Уже есть такой таск' };
@@ -163,16 +114,15 @@ export class UserAdminService {
       case null:
         return { error: true, message: 'Неизвестное действие' };
       case 'decline':
-        this.userModel.update(
-          {
+        this.prismaService.users.update({
+          where: {
+            user_id: user.user_id,
+          },
+          data: {
             status: 3,
           },
-          {
-            where: {
-              user_id: user.user_id,
-            },
-          },
-        );
+        });
+
         return { result: true, message: 'Пользователь отклонен' };
       default:
         this.usersQueue.add(
@@ -196,46 +146,36 @@ export class UserAdminService {
     id: number,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const marker = await this.markersModel
-      .findOne({
-        where: {
-          id: id,
-        },
-        attributes: ['name', 'x', 'y', 'z', 'id_type', 'description', 'user'],
-      })
-      .then((marker) => {
-        this.markersModel.destroy({
-          where: {
-            id: id,
-          },
-        });
-        return marker;
-      });
+    const deleteMarker = await this.prismaService.markers.delete({
+      where: {
+        id: id,
+      },
+    });
 
     this.logsService.logger(
-      JSON.stringify({ action: 'delete-marker', data: marker }),
+      JSON.stringify({ action: 'delete-marker', data: deleteMarker }),
       'delete-marker',
-      marker.user,
+      deleteMarker.user_id,
       manager.localuser.username,
       manager.id,
     );
 
     const job = await this.markersQueue.getJob(
-      `refreshMarkers-${marker.server}-${marker.id_type}`,
+      `refreshMarkers-${deleteMarker.server}-${deleteMarker.id_type}`,
     );
 
     if (
       job &&
-      job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`
+      job.data.action !== `refreshMarkers-${deleteMarker.server}-${deleteMarker.id_type}`
     ) {
       this.markersQueue.add(
         {
-          action: `refreshMarkers-${marker.server}`,
-          serverName: marker.server,
-          type: marker.id_type,
+          action: `refreshMarkers-${deleteMarker.server}`,
+          serverName: deleteMarker.server,
+          type: deleteMarker.id_type,
         },
         {
-          jobId: `refreshMarkers-${marker.server}-${marker.id_type}`,
+          jobId: `refreshMarkers-${deleteMarker.server}-${deleteMarker.id_type}`,
           removeOnComplete: true,
           delay: 1000 * 60 * 15,
         },
@@ -253,31 +193,37 @@ export class UserAdminService {
     body: markersUpdateDto,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const marker = await this.markersModel
-      .findOne({
-        where: {
-          id: body.id,
+    const marker = await this.prismaService.markers.findUnique({
+      where: {
+        id: body.id,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
+          },
         },
-        attributes: ['name', 'x', 'y', 'z', 'id_type', 'description', 'user'],
-      })
-      .then((marker) => {
-        this.markersModel.update(
-          {
-            name: body.name,
-            x: body.x,
-            y: body.y,
-            z: body.z,
-            id_type: body.id_type,
-            description: body.description,
-          },
-          {
-            where: {
-              id: body.id,
-            },
-          },
-        );
-        return marker;
-      });
+      },
+    });
+
+    if (!marker) {
+      return { error: true, message: 'Маркер не найден' };
+    }
+
+    this.prismaService.markers.update({
+      where: {
+        id: body.id,
+      },
+      data: {
+        name: body.name,
+        x: body.x,
+        y: 64,
+        z: body.z,
+        id_type: body.id_type,
+        description: body.description,
+      },
+    });
 
     this.logsService.logger(
       JSON.stringify({
@@ -285,19 +231,14 @@ export class UserAdminService {
         data: { oldMarker: marker, newMarker: body },
       }),
       'update-marker',
-      marker.user,
+      marker.user_id,
       manager.localuser.username,
       manager.id,
     );
 
-    const job = await this.markersQueue.getJob(
-      `refreshMarkers-${marker.server}-${marker.id_type}`,
-    );
+    const job = await this.markersQueue.getJob(`refreshMarkers-${marker.server}-${marker.id_type}`);
 
-    if (
-      job &&
-      job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`
-    ) {
+    if (job && job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
       this.markersQueue.add(
         {
           action: `refreshMarkers-${marker.server}-${marker.id_type}`,
@@ -319,34 +260,34 @@ export class UserAdminService {
     id: number,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const territory = await this.territoriesModel
-      .findOne({
-        where: {
-          id: id,
-        },
-        attributes: [
-          'name',
-          'world',
-          'xStart',
-          'xStop',
-          'zStart',
-          'zStop',
-          'user',
-        ],
-      })
-      .then((territory) => {
-        this.territoriesModel.destroy({
-          where: {
-            id: id,
+    const territory = await this.prismaService.territories.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
           },
-        });
-        return territory;
-      });
+        },
+      },
+    });
+
+    if (!territory) {
+      return { error: true, message: 'Территория не найдена' };
+    }
+
+    this.prismaService.territories.delete({
+      where: {
+        id: id,
+      },
+    });
 
     this.logsService.logger(
       JSON.stringify({ action: 'delete-territory', data: territory }),
       'delete-territory',
-      territory.user,
+      territory.user_id,
       manager.localuser.username,
       manager.id,
     );
@@ -358,49 +299,37 @@ export class UserAdminService {
     body: terrUpdateDto,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const territory = await this.territoriesModel
-      .findOne({
-        where: {
-          id: body.id,
+    const territory = await this.prismaService.territories.findUnique({
+      where: {
+        id: body.id,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
+          },
         },
-        attributes: [
-          'name',
-          'world',
-          'xStart',
-          'xStop',
-          'zStart',
-          'zStop',
-          'user',
-          'status',
-        ],
-      })
-      .then((territory) => {
-        let status = territory.status;
-        if (body?.name?.includes('[hold]')) {
-          status = 'hold';
-        }
-        if (body?.name?.includes('[repopulate]')) {
-          status = 'repopulate';
-        }
+      },
+    });
 
-        this.territoriesModel.update(
-          {
-            name: body.name,
-            world: body.world,
-            xStart: body.xStart,
-            xStop: body.xStop,
-            zStart: body.zStart,
-            zStop: body.zStop,
-            status: status,
-          },
-          {
-            where: {
-              id: body.id,
-            },
-          },
-        );
-        return territory;
-      });
+    if (!territory) {
+      return { error: true, message: 'Территория не найдена' };
+    }
+
+    this.prismaService.territories.update({
+      where: {
+        id: body.id,
+      },
+      data: {
+        name: body.name,
+        world: body.world,
+        xStart: body.xStart,
+        xStop: body.xStop,
+        zStart: body.zStart,
+        zStop: body.zStop,
+      },
+    });
 
     this.logsService.logger(
       JSON.stringify({
@@ -408,7 +337,7 @@ export class UserAdminService {
         data: { oldTerritory: territory, newTerritory: body },
       }),
       'update-territory',
-      territory.user,
+      territory.user_id,
       manager.localuser.username,
       manager.id,
     );
@@ -416,48 +345,43 @@ export class UserAdminService {
     return { result: true, message: 'Территория обновлена' };
   }
 
-  //getRegens
   async getRegens(): Promise<any> {
-    return this.regensModel
-      .findAll({
-        where: {
-          status: 'new',
-        },
-      })
-      .catch((err) => {
-        return { error: true, message: err };
-      });
+    return this.prismaService.regens.findMany({
+      where: {
+        status: 'new',
+      },
+    });
   }
 
-  //updateUser
   async updateUser(
     body: updateUserDto,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    const user = await this.userModel
-      .findOne({
-        where: {
-          user_id: body.id,
-        },
-        attributes: ['expiration_date'],
-      })
-      .then((user) => {
-        this.userModel.update(
-          {
-            immun: body.immun,
-            expiration_date: body.expiration_date,
-            note: body.note,
-            partner: body.partner,
-            citizenship: body.citizenship,
-          },
-          {
-            where: {
-              user_id: body.id,
-            },
-          },
-        );
-        return user;
-      });
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        user_id: body.id,
+      },
+      select: {
+        expiration_date: true,
+      },
+    });
+
+    if (!user) {
+      return { error: true, message: 'Пользователь не найден' };
+    }
+
+    this.prismaService.users.update({
+      where: {
+        user_id: body.id,
+      },
+      data: {
+        immun: body.immun,
+        expiration_date: body.expiration_date,
+        note: body.note,
+        partner: body.partner,
+        citizenship: body.citizenship,
+      },
+    });
 
     if (body.expiration_date) {
       this.logsService.logger(
@@ -483,42 +407,35 @@ export class UserAdminService {
     body: regenActionDto,
     manager,
   ): Promise<{ error?: boolean; result?: boolean; message?: string }> {
-    await this.markersModel.destroy({
+    await this.prismaService.markers.deleteMany({
       where: {
-        user: body.user_id,
+        user_id: body.user_id,
       },
     });
 
     if (body.action === 'regen') {
-      await this.territoriesModel.destroy({
-        where: {
-          user: body.user_id,
-        },
-      });
-    } else {
-      await this.territoriesModel.update(
-        {
-          name: fn('replace', col('name'), '[hold]', '[repopulate]'),
-          status: 'repopulate',
-        },
-        {
-          where: {
-            user: body.user_id,
-          },
-        },
-      );
-    }
-
-    await this.regensModel.update(
-      {
-        status: 'done',
-      },
-      {
+      await this.prismaService.territories.deleteMany({
         where: {
           user_id: body.user_id,
         },
+      });
+    } else {
+      await this.prismaService.$queryRaw`
+        UPDATE 
+          territories 
+        SET 
+          name = REPLACE(name, '[hold]', '[repopulate]'), 
+          status = 'repopulate' 
+        WHERE 
+          user_id = '${body.user_id}'
+      `;
+    }
+
+    await this.prismaService.regens.deleteMany({
+      where: {
+        user_id: body.user_id,
       },
-    );
+    });
 
     this.logsService.logger(
       JSON.stringify({
@@ -535,24 +452,24 @@ export class UserAdminService {
   }
 
   async getWhitelist(): Promise<any> {
-    return this.userModel.findAll({
+    return this.prismaService.users.findMany({
       where: {
         status: 2,
       },
-      attributes: [
-        'username',
-        'status',
-        'tag',
-        'type',
-        'user_id',
-        'age',
-        'from_about',
-        'you_about',
-        'partner',
-        'immun',
-        'note',
-        'expiration_date',
-      ],
+      select: {
+        username: true,
+        status: true,
+        tag: true,
+        type: true,
+        user_id: true,
+        age: true,
+        from_about: true,
+        you_about: true,
+        partner: true,
+        immun: true,
+        note: true,
+        expiration_date: true,
+      },
     });
   }
 

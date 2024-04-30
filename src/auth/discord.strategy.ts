@@ -2,11 +2,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Profile, Strategy } from 'passport-discord';
 import { ConfigModule } from '@nestjs/config';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/users.model';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface IProfile extends Profile {
-  localuser?: User;
+  localuser?: {
+    username: string;
+    type: number;
+    status: number;
+  };
   role: string;
 }
 
@@ -23,20 +26,21 @@ const config = {
 
 @Injectable()
 export class DiscordStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
-  ) {
+  constructor(private readonly prismaService: PrismaService) {
     super(config);
   }
 
   async validate(accessToken: string, refreshToken: string, profile: IProfile) {
     if (profile) {
-      const user = await this.userModel.findOne({
+      const user = await this.prismaService.users.findUnique({
         where: {
           user_id: profile.id,
         },
-        attributes: ['username', 'type', 'status'],
+        select: {
+          username: true,
+          type: true,
+          status: true,
+        },
       });
 
       profile.role = this.getRole(profile.id, user?.status);
@@ -50,9 +54,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
   }
 
   private getRole(id: string, status: number): string {
-    if (
-      JSON.parse(process.env.ADMINS_IDS).includes(id)
-    ) {
+    if (JSON.parse(process.env.ADMINS_IDS).includes(id)) {
       return 'admin';
     }
 

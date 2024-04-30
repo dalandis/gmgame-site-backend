@@ -6,8 +6,8 @@ import {
   Response,
   Post,
   Body,
-  HttpStatus,
   SetMetadata,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -27,15 +27,12 @@ export class UsersController {
   async profile(@Request() req, @Response() res): Promise<any> {
     const user = await this.usersService.getUser(req.user.id);
 
-    if (
-      user?.status &&
-      req.session.passport.user?.localuser?.status &&
-      user?.status !== req.session.passport.user?.localuser?.status
-    ) {
-      req.session.passport.user.localuser.status = user?.status;
-      if (user?.status === 2) {
-        req.session.passport.user.role = 'player';
-      }
+    console.log(req.session.passport.user);
+
+    if (user?.status === 2 && req.session.passport.user.role === 'user') {
+      req.session.passport.user.role = 'player';
+      req.session.passport.user.localuser.status = 2;
+      req.session.save();
     }
 
     res.send({
@@ -48,11 +45,7 @@ export class UsersController {
 
   @UseGuards(AuthenticatedGuard)
   @Post('/registration_user')
-  async regUser(
-    @Request() req,
-    @Body() body: CreateUserDto,
-    @Response() res,
-  ): Promise<any> {
+  async regUser(@Request() req, @Body() body: CreateUserDto, @Response() res): Promise<any> {
     const message = await this.usersService.addUser(body, req.user);
 
     res.send(JSON.stringify(message));
@@ -66,17 +59,14 @@ export class UsersController {
     @Body() body: ChangePasswordDto,
     @Response() res,
   ): Promise<any> {
-    const message = await this.usersService.changePassword(body, req.user);
+    const message = await this.usersService.changePassword(body, req.user.id);
 
     res.send(JSON.stringify(message));
   }
 
   @UseGuards(AuthenticatedGuard)
   @Post('/resubmit')
-  async resubmit(
-    @Request() req,
-    @Response() res,
-  ): Promise<any> {
+  async resubmit(@Request() req, @Response() res): Promise<any> {
     const message = await this.usersService.resubmit(req.user);
 
     res.send(JSON.stringify(message));

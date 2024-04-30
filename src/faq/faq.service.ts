@@ -1,52 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
 import { saveFaqDto } from '../validator/faq';
-import { Faq } from './faq.model';
-import { UtilsService, IWorldType } from '../Utils/utils.service';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
-import { LogsService } from '../logs/logs.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class FaqService {
-    constructor(
-        @InjectModel(Faq)
-        private faqModel: typeof Faq,
-        private readonly dataProviderService: DataProviderService,
-    ) {}
+  constructor(
+    private readonly dataProviderService: DataProviderService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
-    async saveFaq(data: saveFaqDto): Promise<any> {
-        let faq = await this.faqModel.findOne({ where: { id: data.id } });
+  async saveFaq(data: saveFaqDto): Promise<any> {
+    let faq = await this.prismaService.faq.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
 
-        if (faq) {
-            await this.faqModel.update(data, { where: { id: data.id } });
-        } else {
-            delete data.id;
-            faq = await this.faqModel.create(data);
-        }
-        return {message: 'Сохранено', quest: faq};
+    if (faq) {
+      await this.prismaService.faq.update({
+        where: {
+          id: data.id,
+        },
+        data,
+      });
+    } else {
+      delete data.id;
+      faq = await this.prismaService.faq.create({
+        data,
+      });
     }
+    return { message: 'Сохранено', quest: faq };
+  }
 
-    async getMentions(): Promise<any> {
-        const mentions = await this.dataProviderService.sendToBot({}, 'get_mentions', 'POST');
+  async getMentions(): Promise<any> {
+    const mentions = await this.dataProviderService.sendToBot({}, 'get_mentions', 'POST');
 
-        console.log(mentions.data)
-        return mentions.data;
-    }
+    console.log(mentions.data);
+    return mentions.data;
+  }
 
-    async getFaq(): Promise<any> {
-        const faq = await this.faqModel.findAll();
-        return faq;
-    }
+  async getFaq(): Promise<any> {
+    const faq = await this.prismaService.faq.findMany();
 
-    async publishFaq(): Promise<any> {
-        const faq = await this.faqModel.findAll();
+    return faq;
+  }
 
-        const data = {
-            faq: faq
-        };
+  async publishFaq(): Promise<any> {
+    const faq = await this.prismaService.faq.findMany();
 
-        this.dataProviderService.sendToBot(data, 'send_faq', 'POST');
-    }
+    const data = {
+      faq: faq,
+    };
+
+    this.dataProviderService.sendToBot(data, 'send_faq', 'POST');
+  }
 }

@@ -12,18 +12,12 @@ import { Logs } from '../../logs/logs.model';
 import { Regens } from './regens.model';
 import { Tickets } from '../../tickets/tickets.model';
 import { OldUser } from '../../users/old-user.model';
+import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([
-      User,
-      Markers,
-      Territories,
-      Logs,
-      Regens,
-      Tickets,
-      OldUser,
-    ]),
+    SequelizeModule.forFeature([User, Markers, Territories, Logs, Regens, Tickets, OldUser]),
+    PrismaModule,
     BullModule.registerQueue({
       name: 'users',
     }),

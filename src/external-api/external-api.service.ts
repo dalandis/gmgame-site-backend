@@ -7,17 +7,13 @@ import {
 } from '../validator/external-api/create-user';
 import { ConfigModule } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/users.model';
-import { Awards } from '../awards/awards.model';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op, col } from 'sequelize';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import * as crypto from 'crypto';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../logs/logs.service';
-import { Territories } from '../territories/territories.model';
+import { PrismaService } from '../prisma/prisma.service';
 
 ConfigModule.forRoot({
   envFilePath: '.env.api',
@@ -50,17 +46,12 @@ interface Terr {
 export class ExternalApiService {
   constructor(
     private readonly userService: UsersService,
-    @InjectModel(User)
-    private userModel: typeof User,
-    @InjectModel(Awards)
-    private awardsModel: typeof Awards,
     private readonly utilsService: UtilsService,
     private readonly dataProviderService: DataProviderService,
     @InjectQueue('users')
     private usersQueue: Queue,
     private readonly logsService: LogsService,
-    @InjectModel(Territories)
-    private territoriesModel: typeof Territories,
+    private readonly prismaService: PrismaService,
   ) {}
 
   async createUser(
@@ -103,11 +94,13 @@ export class ExternalApiService {
 
   async getStatus(userId: string): Promise<Record<string, string | number>> {
     try {
-      const user = await this.userModel.findOne({
+      const user = await this.prismaService.users.findUnique({
         where: {
           user_id: userId,
         },
-        attributes: ['status'],
+        select: {
+          status: true,
+        },
       });
 
       return { error: '', status_code: 200, status: user.status };
@@ -120,16 +113,20 @@ export class ExternalApiService {
     params: checkUserDto,
   ): Promise<Record<string, string | number | Record<string, string>>> {
     try {
-      const user = await this.userModel.findOne({
+      const user = await this.prismaService.users.findFirst({
         where: {
-          [Op.or]: [{ user_id: params.user }, { username: params.user }],
+          OR: [{ user_id: params.user }, { username: params.user }],
         },
-        attributes: ['username', 'status', 'tag', 'type', 'user_id'],
+        select: {
+          username: true,
+          status: true,
+          tag: true,
+          type: true,
+          user_id: true,
+        },
       });
 
-      console.log(user.tag);
-
-      const tag = JSON.parse(user.tag);
+      const tag = user.tag as any;
 
       return {
         success: 'ok',
@@ -149,20 +146,22 @@ export class ExternalApiService {
     }
   }
 
-  async acceptUser(
-    params: decisionUserDto,
-  ): Promise<Record<string, string | number>> {
+  async acceptUser(params: decisionUserDto): Promise<Record<string, string | number>> {
     const job = await this.usersQueue.getJob(`${params.user}-accept`);
 
     if (job && job.data.action === 'accept-user') {
       return { error: 'task in work', status_code: 400, status: null };
     }
 
-    const user = await this.userModel.findOne({
+    const user = await this.prismaService.users.findFirst({
       where: {
         user_id: params.user,
       },
-      attributes: ['username', 'password', 'type'],
+      select: {
+        username: true,
+        password: true,
+        type: true,
+      },
     });
 
     this.usersQueue.add(
@@ -180,69 +179,14 @@ export class ExternalApiService {
     );
 
     return { success: 'ok', status_code: 200, error: '', data: '' };
-
-    // try{
-    //     const user = await this.userModel.findOne({
-    //         where: {
-    //             user_id: params.user
-    //         },
-    //         attributes: ['username', 'password', 'type']
-    //     });
-
-    //     const isDiscord = await this.dataProviderService.sendToBot({user: params.user}, 'check_user_define', 'POST');
-
-    //     const days = isDiscord.data ? 60 : 14;
-    //     const date = new Date();
-    //     date.setDate(date.getDate() + days);
-
-    //     this.userModel.update(
-    //         {
-    //             expiration_date: date,
-    //             is_discord: isDiscord.data
-    //         },
-    //         {
-    //             where: {
-    //                 user_id: params.user
-    //             }
-    //         }
-    //     );
-
-    //     const payload = {
-    //         "username" : user.username,
-    //         "password" : user.password,
-    //         "type" : user.type
-    //     }
-
-    //     const response = await this.dataProviderService.sendToServerApi(payload, 'add_user_new', 'POST');
-
-    //     if (response.status != 200) {
-    //         return { "error": `error add user, ${response.status}`, "status_code": 400, "status": null }
-    //     }
-
-    //     await this.userModel.update(
-    //         {
-    //             status: 2
-    //         },
-    //         {
-    //             where: {
-    //                 user_id: params.user
-    //             }
-    //         }
-    //     );
-
-    //     return {"success": "ok", "status_code": 200, "error": "", "data": "" };
-    // } catch (err) {
-    //     return { "error": "unknown error", "status_code": 400, "status": null };
-    // }
   }
 
-  async eventUser(
-    params: eventUserDto,
-  ): Promise<Record<string, string | number>> {
-    const user = await this.userModel.findOne({
+  async eventUser(params: eventUserDto): Promise<Record<string, string | number>> {
+    const user = await this.prismaService.users.findFirst({
       where: {
         user_id: params.user_id,
       },
+      omit: { password: true },
     });
 
     await this.logsService
@@ -256,15 +200,17 @@ export class ExternalApiService {
       .catch((err) => console.log(err));
 
     if (!user?.user_id && params.event === 'join') {
-      this.userModel.create({
-        user_id: params.user_id,
-        status: 6,
-        tag: '{}',
-        age: 0,
-        from_about: '',
-        you_about: '',
-        is_discord: true,
-        type: 0,
+      await this.prismaService.users.create({
+        data: {
+          user_id: params.user_id,
+          status: 6,
+          tag: '{}',
+          age: 0,
+          from_about: '',
+          you_about: '',
+          is_discord: true,
+          type: 0,
+        },
       });
 
       return { satus: 6 };
@@ -321,31 +267,26 @@ export class ExternalApiService {
         .catch((err) => console.log(err));
     }
 
-    this.userModel
-      .update(toUpadate, {
-        where: {
-          user_id: params.user_id,
-        },
-      })
-      .catch((err) => console.log(err));
+    this.prismaService.users.update({
+      where: {
+        user_id: params.user_id,
+      },
+      data: toUpadate,
+    });
 
     return { status: user.status };
   }
 
-  async denyUser(
-    params: decisionUserDto,
-  ): Promise<Record<string, string | number>> {
+  async denyUser(params: decisionUserDto): Promise<Record<string, string | number>> {
     try {
-      await this.userModel.update(
-        {
+      await this.prismaService.users.update({
+        where: {
+          user_id: params.user,
+        },
+        data: {
           status: 3,
         },
-        {
-          where: {
-            user_id: params.user,
-          },
-        },
-      );
+      });
 
       return { success: 'ok', status_code: 200, error: '', data: '' };
     } catch (err) {
@@ -385,11 +326,14 @@ export class ExternalApiService {
         return { success: 'ok', status_code: 200, error: '', data: '' };
       }
 
-      const user = await this.userModel.findOne({
+      const user = await this.prismaService.users.findFirst({
         where: {
           username: username,
         },
-        attributes: ['user_id', 'balance'],
+        select: {
+          user_id: true,
+          balance: true,
+        },
       });
 
       if (!user?.user_id) {
@@ -397,21 +341,20 @@ export class ExternalApiService {
       }
 
       if (prize === 'money') {
-        await this.userModel.update(
-          {
+        await this.prismaService.users.update({
+          where: {
+            username: username,
+          },
+          data: {
             balance: user.balance + 10,
           },
-          {
-            where: {
-              username: username,
-            },
-          },
-        );
+        });
       } else {
-        await this.awardsModel.create({
-          type: prize,
-          user_id: user.user_id,
-          issued: 0,
+        await this.prismaService.awards.create({
+          data: {
+            user_id: user.user_id,
+            type: prize,
+          },
         });
       }
 
@@ -435,9 +378,7 @@ export class ExternalApiService {
       selfSign = crypto.createHash('sha256').update(secretString).digest('hex');
     } else {
       const secretString =
-        params.username +
-        params.timestamp +
-        process.env.SECRET_KEY_FOR_VOTE_HOTMC;
+        params.username + params.timestamp + process.env.SECRET_KEY_FOR_VOTE_HOTMC;
 
       selfSign = crypto.createHash('sha1').update(secretString).digest('hex');
     }
@@ -469,26 +410,23 @@ export class ExternalApiService {
     world?: string;
   }> {
     try {
-      const locations = await this.territoriesModel.findAll({
-        include: [
-          {
-            model: this.userModel,
-            attributes: [],
-          },
-        ],
+      const locations = await this.prismaService.territories.findMany({
         where: {
           world: world,
           status: status,
         },
-        attributes: [
-          'name',
-          'xStart',
-          'zStart',
-          'xStop',
-          'zStop',
-          [col('player.username'), 'username'],
-        ],
-        raw: true,
+        select: {
+          name: true,
+          xStart: true,
+          zStart: true,
+          xStop: true,
+          zStop: true,
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
       });
 
       let terrs: { [key: string]: Terr } = {};
@@ -496,7 +434,7 @@ export class ExternalApiService {
       for (let marker of locations) {
         terrs[marker.name] = {
           territory: `'${marker.name}'`,
-          username: marker.username,
+          username: marker.user.username,
           guild: '',
           acquired: '2021-05-05 02:24:09',
           attacker: null,
@@ -522,13 +460,15 @@ export class ExternalApiService {
     }
   }
 
-  async kickUser(
-    params,
-  ): Promise<Record<string, string | number | Record<string, string>>> {
+  async kickUser(params): Promise<Record<string, string | number | Record<string, string>>> {
     try {
-      const user = await this.userModel.findOne({
-        where: { user_id: params.user },
-        attributes: ['username'],
+      const user = await this.prismaService.users.findFirst({
+        where: {
+          user_id: params.user,
+        },
+        select: {
+          username: true,
+        },
       });
 
       if (!user) {

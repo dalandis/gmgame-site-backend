@@ -11,20 +11,15 @@ import { Territories } from '../territories/territories.model';
 import { BullModule } from '@nestjs/bull';
 import { OldUser } from './old-user.model';
 import { Gallery } from '../gallery/gallery.model';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([
-      User,
-      Awards,
-      Markers,
-      Territories,
-      OldUser,
-      Gallery,
-    ]),
+    SequelizeModule.forFeature([User, Awards, Markers, Territories, OldUser, Gallery]),
     BullModule.registerQueue({
       name: 'users',
     }),
+    PrismaModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UtilsService, DataProviderService],

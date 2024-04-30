@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Tickets } from './tickets.model';
+import { tickets } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TicketsService {
-  constructor(
-    @InjectModel(Tickets)
-    private ticketsModel: typeof Tickets,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
-  async closeTicket(data): Promise<Tickets> {
-    return this.ticketsModel.create({
-      user_id: data.user_id,
-      name: data.ticket_id,
+  async closeTicket(data): Promise<tickets> {
+    return this.prismaService.tickets.create({
+      data: {
+        user_id: data.user_id,
+        name: data.ticket_id,
+      },
     });
   }
 }

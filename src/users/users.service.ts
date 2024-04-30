@@ -1,40 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
-import { User } from './users.model';
-import { DataProviderService } from '../data-provider/data-provider.service';
-import { UtilsService } from '../Utils/utils.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { OldUser } from './old-user.model';
-import { IsNull } from 'sequelize-typescript';
+import { users } from '@prisma/client';
+import { DataProviderService } from '../data-provider/data-provider.service';
+import { UtilsService } from '../Utils/utils.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from '../validator/create.user';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
-    @InjectModel(OldUser)
-    private oldUserModel: typeof OldUser,
     private readonly dataProviderService: DataProviderService,
     private readonly utilsService: UtilsService,
     @InjectQueue('users')
     private usersQueue: Queue,
+    private prismaService: PrismaService,
   ) {}
 
-  async getUser(user_id: string): Promise<User> {
-    return this.userModel.findOne({
+  async getUser(user_id: string): Promise<Omit<users, 'password'>> {
+    const user = await this.prismaService.users.findUnique({
       where: {
         user_id,
       },
-      attributes: { exclude: ['password'] },
+      omit: { password: true },
     });
+
+    return user;
   }
 
-  async addUser(params, discordUser): Promise<Record<string, string>> {
-    const user = await this.userModel.findOne({
+  async addUser(params: CreateUserDto, discordUser): Promise<Record<string, string>> {
+    const user = await this.prismaService.users.findFirst({
       where: {
-        [Op.or]: [{ user_id: discordUser.id }, { username: params.login }],
+        OR: [{ user_id: discordUser.id }, { username: params.login }],
       },
     });
 
@@ -55,10 +52,10 @@ export class UsersService {
       return { error: 'Ошибка Discord' };
     }
 
-    await this.userModel.upsert({
+    const data = {
       username: params.login,
       password: params.password,
-      tag: JSON.stringify(discordUser),
+      tag: discordUser,
       type: params.type,
       age: params.age,
       from_about: params.from_about,
@@ -66,12 +63,17 @@ export class UsersService {
       status: 1,
       user_id: discordUser.id,
       partner: 'gmgame',
-      reg_date: new Date(),
-      expiration_date: new Date(),
       is_discord: discordResponse?.data?.data || false,
       server: params.servers,
       friends: params.friend_name,
-      citizenship: false,
+    };
+
+    await this.prismaService.users.upsert({
+      where: {
+        user_id: discordUser.id,
+      },
+      update: data,
+      create: data,
     });
 
     this.sendWebhook(params, discordUser, user?.reapplication);
@@ -94,9 +96,7 @@ export class UsersService {
       reapplication: reapplication,
     };
 
-    const job = await this.usersQueue.getJob(
-      `${discordUser.id}-create-new-user-ticket`,
-    );
+    const job = await this.usersQueue.getJob(`${discordUser.id}-create-new-user-ticket`);
 
     if (job && job.data.action === `create-new-user-ticket`) {
       return { error: true, message: 'Уже есть такая заявка' };
@@ -122,10 +122,19 @@ export class UsersService {
     // this.dataProviderService.sendToBot(payload, 'create_ticket', 'POST');
   }
 
-  async changePassword(params, user) {
+  async changePassword(params, user_id) {
+    const user = await this.prismaService.users.findFirst({
+      where: {
+        user_id: user_id,
+      },
+      select: {
+        username: true,
+      },
+    });
+
     const payload = {
       password: params.password,
-      username: user.localuser.username,
+      username: user.username,
     };
 
     const result = await this.dataProviderService.sendToServerApi(
@@ -142,13 +151,9 @@ export class UsersService {
   }
 
   async resubmit(reqUser) {
-    const user = await this.userModel.findOne({
+    const user = await this.prismaService.users.findFirst({
       where: {
-        [Op.and]: [
-          { user_id: reqUser.id },
-          { status: 3 },
-          { reapplication: false },
-        ],
+        AND: [{ user_id: reqUser.id }, { status: 3 }, { reapplication: false }],
       },
     });
 
@@ -156,49 +161,34 @@ export class UsersService {
       return { error: 'Пользователь не определен или отклонил повторную заявку' };
     }
 
-    await this.oldUserModel.create({
-      username: user.username,
-      password: user.password,
-      tag: user.tag,
-      type: user.type,
-      age: user.age,
-      from_about: user.from_about,
-      you_about: user.you_about,
-      status: user.status,
-      user_id: user.user_id,
-      partner: user.partner,
-      reg_date: user.reg_date,
-      expiration_date: user.expiration_date,
-      is_discord: user.is_discord,
-      server: user.server,
-      friends: user.friends,
-      reapplication: true,
-      citizenship: user.citizenship,
-      balance: user.balance,
-      immun: user.immun,
-      note: user.note,
+    const oldUser = { ...user } as any;
+    delete oldUser.id;
+    delete oldUser.user_id;
+
+    await this.prismaService.oldUsers.create({
+      data: {
+        user: {
+          connect: { user_id: user.user_id },
+        },
+        ...oldUser,
+      },
     });
 
-    const job = await this.usersQueue.getJob(
-      `${reqUser.id}-create-new-user-ticket`,
-    );
+    const job = await this.usersQueue.getJob(`${reqUser.id}-create-new-user-ticket`);
 
     if (job) {
       await job.remove();
     }
 
-    await this.userModel.upsert({
-      user_id: user.user_id,
-      status: 6,
-      tag: '{}',
-      age: 0,
-      from_about: '',
-      you_about: '',
-      is_discord: user.is_discord,
-      type: 0,
-      username: null,
-      reapplication: true,
-      citizenship: user.citizenship,
+    await this.prismaService.users.update({
+      where: {
+        user_id: user.user_id,
+      },
+      data: {
+        status: 6,
+        username: null,
+        reapplication: true,
+      },
     });
 
     return { message: 'Обновлена информация о повторной отправке' };

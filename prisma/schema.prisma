@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma migrate dev --create-only --name init
+// npx prisma migrate deploy
+// npx prisma generate
+
+// npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["omitApi", "metrics", "relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id              Int              @id @default(autoincrement())
+  username        String?           @unique
+  password        String?           
+  tag             Json        
+  type            Int        
+  age             Int        
+  from_about      String?          @db.Text
+  you_about       String?          @db.Text
+  status          Int    
+  user_id         String           @unique
+  partner         String?          @default("gmgame")
+  reg_date        DateTime         @default(now())
+  markers         markers[]    
+  territories     territories[]    
+  awards          awards[]    
+  tickets         tickets[]    
+  oldUsers        oldUsers[]    
+  logs            logs[]    
+  gallery         gallery[] 
+  immun           Boolean          @default(false)
+  note            String?          @db.Text
+  expiration_date DateTime?         @default(now())
+  is_discord      Boolean          @default(false)
+  citizenship     Boolean          @default(false)
+  balance         Int              @default(0)
+  server          String?          @db.Text
+  friends         String?   
+  reapplication   Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([username]) 
+  @@index([user_id]) 
+} 
+ 
+model oldUsers { 
+  id              Int              @id @default(autoincrement())
+  username        String           
+  password        String           
+  tag             Json        
+  type            Int        
+  age             Int        
+  from_about      String?          @db.Text
+  you_about       String?          @db.Text
+  status          Int    
+  user_id         String           
+  partner         String?    
+  reg_date        DateTime?        @default(now())
+  immun           Boolean          @default(false)
+  note            String?          @db.Text
+  expiration_date DateTime?         @default(now())
+  is_discord      Boolean          @default(false)
+  citizenship     Boolean          @default(false)
+  balance         Int              @default(0)
+  server          String?          @db.Text
+  friends         String?   
+  reapplication   Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime?   
+  user            users            @relation(fields: [user_id], references: [user_id])
+ 
+  @@index([username]) 
+  @@index([user_id]) 
+} 
+ 
+model tickets { 
+  id              Int              @id @default(autoincrement())
+  user_id         String           
+  name            String   
+  user            users            @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+} 
+ 
+model territories { 
+  id              Int              @id @default(autoincrement())
+  user_id         String           
+  name            String           @unique
+  xStart          Int   
+  zStart          Int   
+  xStop           Int   
+  zStop           Int   
+  world           String   
+  status          String   
+  user            users            @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+} 
+ 
+model markers { 
+  id              Int              @id @default(autoincrement())
+  user_id         String           
+  id_type         String   
+  x               Int   
+  y               Int   
+  z               Int   
+  name            String           
+  description     String?   
+  server          String   
+  flag            Int   
+  user            users            @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+} 
+ 
+model awards { 
+  id              Int              @id @default(autoincrement())
+  user_id         String           
+  type            String   
+  issued          Boolean          @default(false)  
+  user            users            @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+} 
+ 
+model logs { 
+  id              Int              @id @default(autoincrement())
+  log             String           @db.Text
+  user_id         String           
+  manager         String           
+  managerId       String?          
+  log_date        DateTime         @default(now())     
+  type            String?          
+  user            users            @relation(fields: [user_id], references: [user_id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+} 
+ 
+model goals { 
+  id              Int              @id @default(autoincrement())
+  title           String           
+  description     String           @db.Text
+  archived        Boolean          @default(false)
+  endTime         DateTime?        
+  accum           Int              @default(0)
+  goal            Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+} 
+ 
+model gallery { 
+  id              Int              @id @default(autoincrement())
+  author          String           
+  name            String           @unique
+  description     Json   
+  aprove          Boolean          @default(false)
+  warning         Boolean          @default(false)
+  user            users            @relation(fields: [author], references: [user_id])
+  galleryImages   galleryImages[] 
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([author]) 
+} 
+ 
+model galleryImages { 
+  id              Int              @id @default(autoincrement())
+  gallery_id      Int              
+  image           String           
+  gallery         gallery          @relation(fields: [gallery_id], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([gallery_id]) 
+} 
+
+model regens {
+  id              Int              @id @default(autoincrement())
+  user_id         String           
+  status          String           
+  username        String           
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([user_id]) 
+}
+
+model faq {
+  id              Int              @id @default(autoincrement())
+  quest           String           @unique
+  answer          Json
+  show            Boolean          @default(false)
+  category        String?          
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime? 
+ 
+  @@index([category]) 
+  @@index([quest])
+}

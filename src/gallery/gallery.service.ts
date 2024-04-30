@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Op, where } from 'sequelize';
 import * as Minio from 'minio';
 import { ConfigModule } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import * as sharp from 'sharp';
-import { Gallery } from './gallery.model';
 import { galleryDto } from '../validator/gallery';
-import { User } from '../users/users.model';
-import { GalleryImages } from './gallery-images.model';
+import { PrismaService } from '../prisma/prisma.service';
 
 ConfigModule.forRoot({
   envFilePath: '.env.minio',
@@ -24,18 +20,13 @@ const minioClient = new Minio.Client({
 
 @Injectable()
 export class GalleryService {
-  constructor(
-    @InjectModel(Gallery)
-    private galleryModel: typeof Gallery,
-    @InjectModel(GalleryImages)
-    private galleryImagesModel: typeof GalleryImages,
-    @InjectModel(User)
-    private userModel: typeof User,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
   async saveImages(files: Array<Express.Multer.File>): Promise<any> {
     const fileNames = [];
     const promises = [];
+
+    let errorOccurred = false;
 
     for (const file of files) {
       const metaData = {
@@ -56,6 +47,7 @@ export class GalleryService {
               resolve();
             } catch (error) {
               console.error(`Ошибка при загрузке файла ${filename}${suffix}:`, error);
+              errorOccurred = true;
               reject(error);
             }
           }),
@@ -65,7 +57,11 @@ export class GalleryService {
 
     await Promise.all(promises);
 
-    return {success: true,  data: fileNames};
+    if (errorOccurred) {
+      return { success: false, data: [] };
+    }
+
+    return { success: true, data: fileNames };
   }
 
   private createResizeStreams(file: Buffer, format: any) {
@@ -104,26 +100,24 @@ export class GalleryService {
   }
 
   async getGalleries(): Promise<any> {
-    return this.galleryModel.findAll({
+    return this.prismaService.gallery.findMany({
       where: {
         warning: false,
         aprove: true,
       },
-      include: [
-        {
-          model: GalleryImages,
-          attributes: ['image'],
+      include: {
+        galleryImages: true,
+        user: {
+          select: {
+            username: true,
+          },
         },
-        {
-          model: User,
-          attributes: ['username'],
-        },
-      ],
+      },
     });
   }
 
   async createGallery(body: galleryDto, user): Promise<any> {
-    const existGallery = await this.galleryModel.findOne({
+    const existGallery = await this.prismaService.gallery.findFirst({
       where: {
         name: body.name,
       },
@@ -133,10 +127,12 @@ export class GalleryService {
       return { error: 'Пост с таким названием уже существует' };
     }
 
-    const gallery = await this.galleryModel.create({
-      name: body.name,
-      description: body.description,
-      author: user.id,
+    const gallery = await this.prismaService.gallery.create({
+      data: {
+        name: body.name,
+        description: body.description,
+        author: user.id,
+      },
     });
 
     const galleryImages = [];
@@ -148,26 +144,30 @@ export class GalleryService {
       });
     }
 
-    await this.galleryImagesModel.bulkCreate(galleryImages);
+    await this.prismaService.galleryImages.createMany({
+      data: galleryImages,
+    });
 
     return { message: 'Пост создан' };
   }
 
   async getGallery(id: number, user): Promise<any> {
-    const gallery = await this.galleryModel.findOne({
+    const gallery = await this.prismaService.gallery.findFirst({
       where: {
         id,
       },
-      include: [
-        {
-          model: GalleryImages,
-          attributes: ['image'],
+      include: {
+        galleryImages: {
+          select: {
+            image: true,
+          },
         },
-        {
-          model: User,
-          attributes: ['username'],
+        user: {
+          select: {
+            username: true,
+          },
         },
-      ],
+      },
     });
 
     if (gallery?.author !== user?.id && !gallery.aprove) {
@@ -178,7 +178,7 @@ export class GalleryService {
   }
 
   async editGallery(body: galleryDto, user): Promise<any> {
-    const gallery = await this.galleryModel.findOne({
+    const gallery = await this.prismaService.gallery.findFirst({
       where: {
         id: body.id,
       },
@@ -188,21 +188,19 @@ export class GalleryService {
       return { error: 'Это не твой пост' };
     }
 
-    await this.galleryModel.update(
-      {
+    await this.prismaService.gallery.update({
+      where: {
+        id: body.id,
+      },
+      data: {
         name: body.name,
         description: body.description,
         aprove: false,
         warning: false,
       },
-      {
-        where: {
-          id: body.id,
-        },
-      },
-    );
+    });
 
-    await this.galleryImagesModel.destroy({
+    await this.prismaService.galleryImages.deleteMany({
       where: {
         gallery_id: body.id,
       },
@@ -217,13 +215,15 @@ export class GalleryService {
       });
     }
 
-    await this.galleryImagesModel.bulkCreate(galleryImages);
+    await this.prismaService.galleryImages.createMany({
+      data: galleryImages,
+    });
 
     return { message: 'Пост обновлен' };
   }
 
   async deleteGallery(id: number, user): Promise<any> {
-    const gallery = await this.galleryModel.findOne({
+    const gallery = await this.prismaService.gallery.findFirst({
       where: {
         id,
       },
@@ -233,13 +233,13 @@ export class GalleryService {
       return { error: 'Это не твой пост' };
     }
 
-    await this.galleryModel.destroy({
+    await this.prismaService.gallery.delete({
       where: {
         id,
       },
     });
 
-    await this.galleryImagesModel.destroy({
+    await this.prismaService.galleryImages.deleteMany({
       where: {
         gallery_id: id,
       },
@@ -249,77 +249,65 @@ export class GalleryService {
   }
 
   async approveGallery(id: number): Promise<any> {
-    const gallery = await this.galleryModel.findOne({
+    await this.prismaService.gallery.update({
       where: {
         id,
       },
-    });
-
-    await this.galleryModel.update(
-      {
+      data: {
         aprove: true,
       },
-      {
-        where: {
-          id,
-        },
-      },
-    );
+    });
 
     return { message: 'Пост опубликован' };
   }
 
   async rejectGallery(id: number): Promise<any> {
-    const gallery = await this.galleryModel.findOne({
+    await this.prismaService.gallery.update({
       where: {
         id,
       },
-    });
-
-    await this.galleryModel.update(
-      {
+      data: {
         warning: true,
       },
-      {
-        where: {
-          id,
-        },
-      },
-    );
+    });
 
     return { message: 'Пост отключён' };
   }
 
   async getMyGalleries(user): Promise<any> {
-    return this.galleryModel.findAll({
+    return this.prismaService.gallery.findMany({
       where: {
         author: user.id,
       },
-      include: [
-        {
-          model: GalleryImages,
-          attributes: ['image'],
+      include: {
+        galleryImages: {
+          select: {
+            image: true,
+          },
         },
-        {
-          model: User,
-          attributes: ['username'],
+        user: {
+          select: {
+            username: true,
+          },
         },
-      ],
+      },
     });
   }
 
   async getAllGalleries(): Promise<any> {
-    return this.galleryModel.findAll({
-      include: [
-        {
-          model: GalleryImages,
-          attributes: ['image'],
+    return this.prismaService.gallery.findMany({
+      include: {
+        galleryImages: {
+          select: {
+            image: true,
+          },
         },
-        {
-          model: User,
-          attributes: ['username'],
+        user: {
+          select: {
+            username: true,
+          },
         },
-      ],
+      },
     });
   }
 }

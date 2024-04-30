@@ -18,6 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { UseInterceptors } from '@nestjs/common';
 import * as multer from 'multer';
 import { deleteAproveRejectGalleryDto, galleryDto } from '../validator/gallery';
+import { ParseIntPipe } from '../validator/number-params';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -67,7 +68,7 @@ export class GalleryController {
   }
 
   @Get('get_gallery/:id')
-  async getGallery(@Param() params, @Request() req) {
+  async getGallery(@Param(new ParseIntPipe()) params, @Request() req) {
     return await this.galleryService.getGallery(params.id, req.user);
   }
 

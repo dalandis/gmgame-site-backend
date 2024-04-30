@@ -1,11 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsArray } from 'class-validator';
 
 export class galleryDto {
   @IsOptional()
@@ -17,8 +11,8 @@ export class galleryDto {
   name: string;
 
   @IsNotEmpty()
-  @IsString()
-  description: string;
+  @IsArray()
+  description: object[];
 
   @IsNotEmpty()
   @Type(() => String)

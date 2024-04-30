@@ -1,20 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/users.model';
+import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { Op } from 'sequelize';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CronTasksService {
   constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
     @InjectQueue('cron-tasks')
     private cronTasksQueue: Queue,
     @InjectQueue('citizenship')
     private citizenshipQueue: Queue,
+    private prismaService: PrismaService,
   ) {}
 
   @Cron('00 01 00 * * *', {
@@ -31,19 +28,12 @@ export class CronTasksService {
 
     const date = new Date();
 
-    const usersInDiscord = await this.userModel.findAll({
+    const usersInDiscord = await this.prismaService.users.findMany({
       where: {
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { expiration_date: null },
-              { expiration_date: { [Op.lt]: date } },
-            ],
-          },
-          { [Op.or]: [{ immun: false }, { immun: null }] },
-          { status: 2 },
-          { is_discord: 1 },
-        ],
+        expiration_date: { lt: date },
+        immun: false,
+        status: 2,
+        is_discord: true,
       },
     });
 
@@ -66,19 +56,12 @@ export class CronTasksService {
       );
     }
 
-    const usersOutDiscord = await this.userModel.findAll({
+    const usersOutDiscord = await this.prismaService.users.findMany({
       where: {
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { expiration_date: null },
-              { expiration_date: { [Op.lt]: date } },
-            ],
-          },
-          { [Op.or]: [{ immun: false }, { immun: null }] },
-          { status: 2 },
-          { [Op.or]: [{ is_discord: 0 }, { is_discord: null }] },
-        ],
+        expiration_date: { lt: date },
+        immun: false,
+        status: 2,
+        is_discord: false,
       },
     });
 
@@ -107,15 +90,15 @@ export class CronTasksService {
     timeZone: 'Europe/Moscow',
   })
   async cronSitizenship() {
-    // if (process.env.pm_id !== '2') {
-    //   return;
-    // }
-
-    const citizenships = await this.userModel.findAll({
+    const citizenships = await this.prismaService.users.findMany({
       where: {
-        [Op.and]: [{ citizenship: true }, { is_discord: true }],
+        citizenship: true,
+        is_discord: true,
       },
-      attributes: ['username', 'user_id'],
+      select: {
+        username: true,
+        user_id: true,
+      },
     });
 
     await this.citizenshipQueue.add(
@@ -131,7 +114,7 @@ export class CronTasksService {
   }
 
   @Cron('0 0 * * 0', {
-    disabled: false,
+    disabled: true,
     timeZone: 'Europe/Moscow',
   })
   async clearYearsOldUsersRequests() {
@@ -141,27 +124,25 @@ export class CronTasksService {
     if (process.env.NODE_ENV === 'dev') {
       return;
     }
-    
-    const date = new Date();
-    const dateOneYearOld = date.getFullYear() - 1;
 
-    const oldDeniedUsers = await this.userModel.findAll({
+    const date = new Date();
+    const dateOneYearOld = new Date(date.getFullYear() - 1);
+
+    const oldDeniedUsers = await this.prismaService.users.findMany({
       where: {
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { updatedAt: null },
-              { updatedAt: { [Op.lt]: dateOneYearOld } },
-            ],
-          },
-          { status: 3 },
-        ],
+        updatedAt: {
+          lt: dateOneYearOld,
+        },
+        status: 3,
       },
     });
 
     for (const user of oldDeniedUsers) {
-      await this.userModel.update(            
-        {
+      await this.prismaService.users.update({
+        where: {
+          id: user.id,
+        },
+        data: {
           status: 7,
           tag: '{}',
           age: 0,
@@ -171,12 +152,7 @@ export class CronTasksService {
           username: null,
           reapplication: false,
         },
-        {
-          where: {
-            id: user.id
-          }
-        }
-      );  
+      });
     }
   }
 }

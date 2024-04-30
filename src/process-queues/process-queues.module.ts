@@ -13,17 +13,12 @@ import { CronTasksConsumer } from './tasks-queues.service';
 import { Regens } from '../admin/users/regens.model';
 import { MarkersConsumer } from './markers-queues.service';
 import { CitizenshipConsumer } from './citizenship-queues.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([
-      User,
-      Markers,
-      Territories,
-      Awards,
-      Logs,
-      Regens,
-    ]),
+    SequelizeModule.forFeature([User, Markers, Territories, Awards, Logs, Regens]),
+    PrismaModule,
     BullModule.registerQueue(
       {
         name: 'users',

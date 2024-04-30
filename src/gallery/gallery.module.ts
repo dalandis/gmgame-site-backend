@@ -6,11 +6,10 @@ import { DataProviderService } from '../data-provider/data-provider.service';
 import { User } from '../users/users.model';
 import { Gallery, UsersGallery } from './gallery.model';
 import { GalleryImages } from './gallery-images.model';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([User, Gallery, UsersGallery, GalleryImages]),
-  ],
+  imports: [SequelizeModule.forFeature([User, Gallery, UsersGallery, GalleryImages]), PrismaModule],
   controllers: [GalleryController],
   providers: [GalleryService, DataProviderService],
 })
