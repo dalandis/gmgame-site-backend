@@ -373,7 +373,7 @@ export class UserAdminService {
       return { error: true, message: 'Пользователь не найден' };
     }
 
-    this.prismaService.users.update({
+    await this.prismaService.users.update({
       where: {
         user_id: body.id,
       },
