@@ -36,6 +36,22 @@ export class DataProviderService {
     });
   }
 
+  public async sendToServerApiNew<T>(
+    payload: T,
+    url: string,
+    method: string,
+  ): Promise<AxiosResponse> {
+    return axios.request({
+      data: JSON.stringify(payload),
+      method: method,
+      url: process.env.URL_FOR_SERVER_API_NEW + url,
+      headers: {
+        Authorization: 'Bearer ' + process.env.TOKEN_FOR_SERVER_API,
+        'Content-type': 'application/json',
+      },
+    });
+  }
+
   public async sendToBot<T>(payload: T, url: string, method: string): Promise<AxiosResponse> {
     const response = axios
       .request({
