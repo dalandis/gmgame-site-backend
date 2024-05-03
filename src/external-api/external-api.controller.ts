@@ -145,4 +145,18 @@ export class ExternalApiController {
 
     res.send(response);
   }
+
+  @SetMetadata('role', 'stremers')
+  @UseGuards(LoginGuardBearer, RoleGuard)
+  @Get('/lightning_strike')
+  async lightningStrike(@Request() req, @Response() res): Promise<any> {
+    const response = await this.externalApiService.lightningStrike();
+
+    if (response.error) {
+      res.status(HttpStatus.BAD_REQUEST).json(response);
+      return;
+    }
+
+    res.send(response);
+  }
 }

@@ -10,6 +10,7 @@ ConfigModule.forRoot({
 const config = {
   tokenSuperhub: process.env.SUPERHUB_BEARER,
   tokenGmgame: process.env.GMGAME_BEARER,
+  tokenBaxy: process.env.BAXY_BEARER,
   scope: ['all'],
 };
 
@@ -26,6 +27,10 @@ export class BearerStrategy extends PassportStrategy(Strategy) {
 
     if (config.tokenGmgame === token) {
       return done(null, { username: 'gmgame', role: 'bot' }, { scope: 'all' });
+    }
+
+    if (config.tokenBaxy === token) {
+      return done(null, { username: 'baxy', role: 'stremers' }, { scope: 'all' });
     }
 
     return done(null, false);

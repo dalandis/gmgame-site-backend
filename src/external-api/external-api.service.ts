@@ -502,4 +502,26 @@ export class ExternalApiService {
       return { error: 'unknown error', status_code: 400, status: null };
     }
   }
+
+  async lightningStrike(): Promise<Record<string, string | number>> {
+    try {
+      const response = await this.dataProviderService.sendToServerApiNew(
+        {},
+        'lightning_strike',
+        'GET',
+      );
+
+      if (response.status != 200) {
+        return {
+          error: `error lightning strike, ${response.status}`,
+          status_code: 400,
+          status: null,
+        };
+      }
+
+      return { success: 'ok', status_code: 200, error: '', data: '' };
+    } catch (err) {
+      return { error: 'unknown error', status_code: 400, status: null };
+    }
+  }
 }
