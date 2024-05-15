@@ -241,7 +241,7 @@ export class UserAdminService {
 
     const job = await this.markersQueue.getJob(`refreshMarkers-${marker.server}-${marker.id_type}`);
 
-    if (job && job.data.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
+    if (!job && job.data?.action !== `refreshMarkers-${marker.server}-${marker.id_type}`) {
       this.markersQueue.add(
         {
           action: `refreshMarkers-${marker.server}-${marker.id_type}`,
