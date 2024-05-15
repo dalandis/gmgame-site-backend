@@ -214,7 +214,7 @@ export class UserAdminService {
       return { error: true, message: 'Маркер не найден' };
     }
 
-    this.prismaService.markers.update({
+    await this.prismaService.markers.update({
       where: {
         id: body.id,
       },
