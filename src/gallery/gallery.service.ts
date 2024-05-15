@@ -241,15 +241,15 @@ export class GalleryService {
       return { error: 'Это не твой пост' };
     }
 
-    await this.prismaService.gallery.delete({
-      where: {
-        id,
-      },
-    });
-
     await this.prismaService.galleryImages.deleteMany({
       where: {
         gallery_id: id,
+      },
+    });
+
+    await this.prismaService.gallery.delete({
+      where: {
+        id,
       },
     });
 
