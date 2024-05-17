@@ -158,7 +158,7 @@ export class UsersConsumer {
 
     await this.prismaService.$queryRaw`
       UPDATE territories
-      SET name = CONCAT("[hold] ", name),
+      SET name = CONCAT('[hold] ', name),
         status = 'hold'
       WHERE user = ${id};
     `;
