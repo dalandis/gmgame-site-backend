@@ -320,7 +320,7 @@ export class UserAdminService {
       return { error: true, message: 'Территория не найдена' };
     }
 
-    this.prismaService.territories.update({
+    await this.prismaService.territories.update({
       where: {
         id: body.id,
       },

@@ -175,7 +175,7 @@ export class UsersConsumer {
     });
 
     await this.prismaService.$queryRaw`
-      UPDATE territories
+      UPDATE gmgame.territories
       SET name = REPLACE(REPLACE(name, '[hold]', ''), '[repopulate]', ''),
         status = 'active'
       WHERE user = ${id};

@@ -135,7 +135,7 @@ export class ExternalApiService {
         data: {
           username: user.username,
           status: await this.utilsService.getStatus(user.status),
-          tag: tag.username + '#' + tag.discriminator,
+          tag: !!+tag.discriminator ? tag.username + '#' + tag.discriminator : tag.global_name,
           type: user.type ? 'Лицензия' : 'Пиратка',
           discord_id: user.user_id,
         },
