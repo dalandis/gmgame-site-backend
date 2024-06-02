@@ -281,7 +281,7 @@ export class UserAdminService {
       return { error: true, message: 'Территория не найдена' };
     }
 
-    this.prismaService.territories.delete({
+    await this.prismaService.territories.delete({
       where: {
         id: id,
       },
