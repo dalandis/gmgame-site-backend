@@ -40,10 +40,10 @@ export class GalleryService {
       fileNames.push(`https://static.gmgame.ru/static/${filename}`);
 
       resizeStreams.map(async ({ stream, suffix }) => {
-        const sizeStream = await stream.toBuffer().then((data) => data.length);
-
         promises.push(
           new Promise<void>(async (resolve, reject) => {
+            const sizeStream = await stream.toBuffer().then((data) => data.length);
+
             try {
               await minioClient.putObject(
                 'static',

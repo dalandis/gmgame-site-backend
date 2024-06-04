@@ -232,7 +232,7 @@ export class ExternalApiService {
       const expirationDate = user.expiration_date
         ? new Date(user.expiration_date)
         : new Date(user.createdAt);
-      expirationDate.setDate(expirationDate.getDate() + 46);
+      expirationDate.setDate(expirationDate.getDate() + 53);
 
       if (!user.expiration_date && expirationDate > user.expiration_date) {
         toUpadate = { ...toUpadate, ...{ expiration_date: expirationDate } };

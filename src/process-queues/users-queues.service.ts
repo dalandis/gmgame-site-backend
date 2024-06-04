@@ -191,7 +191,7 @@ export class UsersConsumer {
 
     const isDiscord = response.data?.data;
 
-    const days = isDiscord ? 60 : 14;
+    const days = isDiscord ? 60 : 7;
     const date = new Date();
     date.setDate(date.getDate() + days);
 
