@@ -194,4 +194,18 @@ export class UserAdminController {
 
     res.send(JSON.stringify(response));
   }
+
+  @SetMetadata('role', 'admin')
+  @UseGuards(AuthenticatedGuard, RoleGuard)
+  @Post('/get_tickets')
+  async getTickets(@Request() req, @Response() res): Promise<string> {
+    const response = await this.userAdminService.getTickets();
+
+    if (!response) {
+      res.send(JSON.stringify({ error: 'Нет тикетов' }));
+      return;
+    }
+
+    res.send(JSON.stringify(response));
+  }
 }
