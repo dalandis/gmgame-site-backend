@@ -19,7 +19,7 @@ export class CronTasksService {
     timeZone: 'Europe/Moscow',
   })
   async handleCron() {
-    if (process.env.pm_id !== '2') {
+    if (process.env.pm_id !== '0') {
       return;
     }
     if (process.env.NODE_ENV === 'dev') {
@@ -90,6 +90,13 @@ export class CronTasksService {
     timeZone: 'Europe/Moscow',
   })
   async cronSitizenship() {
+    if (process.env.pm_id !== '0') {
+      return;
+    }
+    if (process.env.NODE_ENV === 'dev') {
+      return;
+    }
+    
     const citizenships = await this.prismaService.users.findMany({
       where: {
         citizenship: true,
@@ -118,7 +125,7 @@ export class CronTasksService {
     timeZone: 'Europe/Moscow',
   })
   async clearYearsOldUsersRequests() {
-    if (process.env.pm_id !== '2') {
+    if (process.env.pm_id !== '0') {
       return;
     }
     if (process.env.NODE_ENV === 'dev') {
