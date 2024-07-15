@@ -501,4 +501,17 @@ export class UserAdminService {
 
     return link;
   }
+
+  async getTickets(): Promise<any> {
+    return this.prismaService.tickets.findMany({
+      include: {
+        user: {
+          select: {
+            username: true,
+            user_id: true,
+          },
+        },
+      },
+    });
+  }
 }
