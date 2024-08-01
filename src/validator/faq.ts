@@ -10,14 +10,12 @@ export class saveFaqDto {
   quest: string;
 
   @IsNotEmpty()
-  @IsString()
-  answer: string;
+  answer: object;
 
   @IsNotEmpty()
   @IsString()
   category: string;
 
-  @IsNotEmpty()
-  @IsInt()
-  show: boolean;
+  @IsOptional()
+  show?: boolean;
 }

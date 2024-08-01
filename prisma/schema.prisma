@@ -223,7 +223,7 @@ model faq {
   id              Int              @id @default(autoincrement())
   quest           String           @unique
   answer          Json
-  show            Boolean          @default(false)
+  show            Boolean?         @default(false)
   category        String?          
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt @default(now())
