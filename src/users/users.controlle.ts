@@ -39,7 +39,7 @@ export class UsersController {
       discordUser: req.user,
       user: user,
       status: await this.utilsService.getStatus(user?.status || 0),
-      version: '1.20.1',
+      version: '1.21.1',
     });
   }
 
