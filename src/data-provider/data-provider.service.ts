@@ -79,4 +79,16 @@ export class DataProviderService {
         return process.env.URL_WEBHOOK_FOR_REG;
     }
   }
+
+  public async mojangApi(username: string): Promise<any> {
+    return axios
+      .request({
+        method: 'GET',
+        url: `https://api.mojang.com/users/profiles/minecraft/${username}`,
+      })
+      .catch((error) => {
+        console.log(error);
+        return { id: 'error' };
+      });
+  }
 }

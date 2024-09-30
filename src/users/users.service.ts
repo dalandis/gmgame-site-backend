@@ -6,6 +6,8 @@ import { DataProviderService } from '../data-provider/data-provider.service';
 import { UtilsService } from '../Utils/utils.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../validator/create.user';
+import { v4 as uuidv4 } from 'uuid';
+import { IUsers } from '../common/types/users.model';
 
 @Injectable()
 export class UsersService {
@@ -55,7 +57,8 @@ export class UsersService {
       return { error: 'Ошибка Discord' };
     }
 
-    const data = {
+    // uusers type
+    const data: IUsers = {
       username: params.login,
       password: params.password,
       tag: discordUser,
@@ -69,7 +72,14 @@ export class UsersService {
       is_discord: discordResponse?.data?.data || false,
       server: params.servers,
       friends: params.friend_name,
+      uuid: uuidv4(),
     };
+
+    if (params.type === 1) {
+      const mojangUser = await this.dataProviderService.mojangApi(params.login);
+
+      data.premium_uuid = mojangUser?.data?.id || mojangUser?.data?.errorMessage || 'error';
+    }
 
     await this.prismaService.users.upsert({
       where: {
@@ -189,8 +199,10 @@ export class UsersService {
       },
       data: {
         status: 6,
+        premium_uuid: null,
         username: null,
         reapplication: true,
+        uuid: null,
       },
     });
 

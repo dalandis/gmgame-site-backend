@@ -22,7 +22,7 @@ datasource db {
 
 model users {
   id              Int              @id @default(autoincrement())
-  username        String?           @unique
+  username        String?          @unique
   password        String?           
   tag             Json        
   type            Int        
@@ -42,7 +42,7 @@ model users {
   gallery         gallery[] 
   immun           Boolean          @default(false)
   note            String?          @db.Text
-  expiration_date DateTime?         @default(now())
+  expiration_date DateTime?        @default(now())
   is_discord      Boolean          @default(false)
   citizenship     Boolean          @default(false)
   balance         Int              @default(0)
@@ -52,6 +52,8 @@ model users {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt @default(now())
   deletedAt       DateTime? 
+  uuid            String?          @unique
+  premium_uuid    String?          @unique
  
   @@index([username]) 
   @@index([user_id]) 
@@ -72,7 +74,7 @@ model oldUsers {
   reg_date        DateTime?        @default(now())
   immun           Boolean          @default(false)
   note            String?          @db.Text
-  expiration_date DateTime?         @default(now())
+  expiration_date DateTime?        @default(now())
   is_discord      Boolean          @default(false)
   citizenship     Boolean          @default(false)
   balance         Int              @default(0)
@@ -83,6 +85,8 @@ model oldUsers {
   updatedAt       DateTime         @updatedAt @default(now())
   deletedAt       DateTime?   
   user            users            @relation(fields: [user_id], references: [user_id])
+  uuid            String?          
+  premium_uuid    String?          
  
   @@index([username]) 
   @@index([user_id]) 

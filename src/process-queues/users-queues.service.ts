@@ -238,6 +238,8 @@ export class UsersConsumer {
       data: {
         status: 6,
         username: null,
+        premium_uuid: null,
+        uuid: null,
       },
     });
   }
