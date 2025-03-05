@@ -78,7 +78,7 @@ export class UsersService {
     if (params.type === 1) {
       const mojangUser = await this.dataProviderService.mojangApi(params.login);
 
-      data.premium_uuid = mojangUser?.data?.id || mojangUser?.data?.errorMessage || 'error';
+      data.premium_uuid = mojangUser?.data?.id || null;
     }
 
     await this.prismaService.users.upsert({
