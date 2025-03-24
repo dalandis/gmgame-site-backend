@@ -54,7 +54,6 @@ export class UsersService {
       );
     } catch (error) {
       console.log(error);
-      return { error: 'Ошибка Discord' };
     }
 
     // uusers type
@@ -89,12 +88,12 @@ export class UsersService {
       create: data,
     });
 
-    this.sendWebhook(params, discordUser, user?.reapplication);
+    this.addJob(params, discordUser, user?.reapplication);
 
     return { message: 'Пользователь успешно создан' };
   }
 
-  private async sendWebhook(params, discordUser, reapplication = false) {
+  private async addJob(params, discordUser, reapplication = false) {
     const payload = {
       login: params.login,
       account: this.utilsService.getAccountType(params.type),
@@ -109,12 +108,6 @@ export class UsersService {
       reapplication: reapplication,
     };
 
-    const job = await this.usersQueue.getJob(`${discordUser.id}-create-new-user-ticket`);
-
-    if (job && job.data.action === `create-new-user-ticket`) {
-      return { error: true, message: 'Уже есть такая заявка' };
-    }
-
     this.usersQueue.add(
       {
         action: `create-new-user-ticket`,
@@ -127,12 +120,9 @@ export class UsersService {
       },
       {
         jobId: `${discordUser.id}-create-new-user-ticket`,
-        removeOnComplete: false,
+        removeOnComplete: true,
       },
     );
-
-    // this.dataProviderService.sendToBot({ticket: data, name: params.login}, 'new_ticket', 'POST');
-    // this.dataProviderService.sendToBot(payload, 'create_ticket', 'POST');
   }
 
   async changePassword(params, user_id) {

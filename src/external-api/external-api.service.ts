@@ -164,6 +164,22 @@ export class ExternalApiService {
       },
     });
 
+    const now = new Date().getTime();
+    const nowHours = new Date(now).getHours();
+    let delay = 0;
+
+    if (nowHours >= 22 || nowHours < 8) {
+      const executionDate = new Date(now);
+
+      executionDate.setHours(8, 0, 0, 0);
+
+      if (nowHours >= 22) {
+        executionDate.setDate(executionDate.getDate() + 1);
+      }
+
+      delay = executionDate.getTime() - now;
+    }
+
     this.usersQueue.add(
       {
         action: 'accept-user',
@@ -175,6 +191,7 @@ export class ExternalApiService {
       {
         jobId: `${params.user}-accept`,
         removeOnComplete: true,
+        delay: delay,
       },
     );
 
