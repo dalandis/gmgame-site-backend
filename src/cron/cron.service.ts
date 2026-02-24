@@ -96,7 +96,7 @@ export class CronTasksService {
     if (process.env.NODE_ENV === 'dev') {
       return;
     }
-    
+
     const citizenships = await this.prismaService.users.findMany({
       where: {
         citizenship: true,

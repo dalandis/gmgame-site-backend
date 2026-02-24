@@ -54,6 +54,7 @@ model users {
   deletedAt       DateTime? 
   uuid            String?          @unique
   premium_uuid    String?          @unique
+  shopItemPurchases shopItemPurchases[]
  
   @@index([username]) 
   @@index([user_id]) 
@@ -235,4 +236,39 @@ model faq {
  
   @@index([category]) 
   @@index([quest])
+}
+
+model shopItems {
+  id              Int              @id @default(autoincrement())
+  name            String
+  type            String
+  amount          Int
+  enchantments    Json
+  gameId          String
+  gameLegend      String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime?
+  shopItemPurchases shopItemPurchases[]
+
+  @@index([type])
+  @@index([gameId])
+}
+
+model shopItemPurchases {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  shopItemId      Int
+  priceAtPurchase Int
+  purchasedAt     DateTime         @default(now())
+  nextAvailableAt DateTime
+  user            users            @relation(fields: [userId], references: [user_id])
+  shopItem        shopItems        @relation(fields: [shopItemId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt @default(now())
+  deletedAt       DateTime?
+
+  @@index([userId, shopItemId, purchasedAt(sort: Desc)])
+  @@index([userId])
+  @@index([shopItemId])
 }

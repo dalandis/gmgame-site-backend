@@ -19,7 +19,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   app.enableCors({
-    origin: 'https://map.gmgame.ru',
+    origin: ['https://map.gmgame.ru', 'https://gmgame.ru', 'https://new.gmgame.ru'],
     credentials: true,
   });
 
@@ -33,11 +33,11 @@ async function bootstrap() {
 
   // const RedisStore = createRedisStore(session);
   // Initialize client.
-  let redisClient = redis.createClient();
+  const redisClient = redis.createClient();
   redisClient.connect().catch(console.error);
 
   // Initialize store.
-  let redisStore = new RedisStore({
+  const redisStore = new RedisStore({
     client: redisClient,
     prefix: 'gmgame:',
     ttl: 31536000,

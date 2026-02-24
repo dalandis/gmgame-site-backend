@@ -89,7 +89,7 @@ export class UsersConsumer {
       return;
     }
 
-    let log = JSON.stringify(job.data);
+    const log = JSON.stringify(job.data);
 
     await this.logsService.logger(
       log,

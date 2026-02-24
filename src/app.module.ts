@@ -12,7 +12,6 @@ import { ExternalApiModule } from './external-api/external-api.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { StatisticsModule } from './statistics/statistics.module';
-import { ShopsModule } from './shops/shops.module';
 import { AdminModule } from './admin/admin.module';
 import { BullModule } from '@nestjs/bull';
 import { ProcessQueuesModule } from './process-queues/process-queues.module';
@@ -24,6 +23,7 @@ import { GoalsModule } from './goals/goals.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ShopModule } from './shop/shop.module';
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MarkersModule,
     AwardsModule,
     StatisticsModule,
-    ShopsModule,
+    ShopModule,
     AdminModule,
     ProcessQueuesModule,
     LogsModule,

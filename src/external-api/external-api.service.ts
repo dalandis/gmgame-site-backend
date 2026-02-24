@@ -339,10 +339,6 @@ export class ExternalApiService {
 
       this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST');
 
-      if (!prize) {
-        return { success: 'ok', status_code: 200, error: '', data: '' };
-      }
-
       const user = await this.prismaService.users.findFirst({
         where: {
           username: username,
@@ -357,16 +353,16 @@ export class ExternalApiService {
         return { success: 'ok', status_code: 200, error: '', data: '' };
       }
 
-      if (prize === 'money') {
-        await this.prismaService.users.update({
-          where: {
-            username: username,
-          },
-          data: {
-            balance: user.balance + 10,
-          },
-        });
-      } else {
+      await this.prismaService.users.update({
+        where: {
+          username: username,
+        },
+        data: {
+          balance: user.balance + 5,
+        },
+      });
+
+      if (prize && prize !== 'money') {
         await this.prismaService.awards.create({
           data: {
             user_id: user.user_id,
@@ -446,9 +442,9 @@ export class ExternalApiService {
         },
       });
 
-      let terrs: { [key: string]: Terr } = {};
+      const terrs: { [key: string]: Terr } = {};
 
-      for (let marker of locations) {
+      for (const marker of locations) {
         terrs[marker.name] = {
           territory: `'${marker.name}'`,
           username: marker.user.username,
