@@ -9,22 +9,15 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
-import * as crypto from 'crypto';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../logs/logs.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { VoteValidationService } from './vote-validation.service';
 
 ConfigModule.forRoot({
   envFilePath: '.env.api',
 });
-
-interface ISignData {
-  project?: string;
-  timestamp: string;
-  username: string;
-  signature: string;
-}
 
 interface Location {
   startX: number;
@@ -52,6 +45,7 @@ export class ExternalApiService {
     private usersQueue: Queue,
     private readonly logsService: LogsService,
     private readonly prismaService: PrismaService,
+    private readonly voteValidationService: VoteValidationService,
   ) {}
 
   async createUser(
@@ -311,92 +305,69 @@ export class ExternalApiService {
     }
   }
 
-  async voteHandler(params): Promise<Record<string, string | number>> {
+  async voteHandler(
+    params: Record<string, any>,
+  ): Promise<{ statusCode: number; message: string; errorType?: string }> {
     try {
-      const username = params.username || params.nick;
+      const validation = this.voteValidationService.validate(params);
 
-      const signData: ISignData = {
-        project: params.project,
-        timestamp: params.timestamp || params.time,
-        username: username,
-        signature: params.signature || params.sign,
-      };
+      if (!validation.ok) {
+        if (validation.error === 'invalid_signature') {
+          return { statusCode: 400, message: 'Transmitted data did not pass validation.' };
+        }
 
-      if (this.checkSign(signData)) {
-        return {
-          error: 'Переданные данные не прошли проверку',
-          status_code: 400,
-          status: null,
-        };
+        return { statusCode: 400, message: 'Required data not transmitted.', errorType: validation.error };
       }
 
-      const prize: string = this.getPrize();
+      await this.applyVoteReward(validation.data.username);
 
-      const dataToBot = {
-        username: username,
-        prize: prize,
-      };
-
-      this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST');
-
-      const user = await this.prismaService.users.findFirst({
-        where: {
-          username: username,
-        },
-        select: {
-          user_id: true,
-          balance: true,
-        },
-      });
-
-      if (!user?.user_id) {
-        return { success: 'ok', status_code: 200, error: '', data: '' };
-      }
-
-      await this.prismaService.users.update({
-        where: {
-          username: username,
-        },
-        data: {
-          balance: user.balance + 5,
-        },
-      });
-
-      if (prize && prize !== 'money') {
-        await this.prismaService.awards.create({
-          data: {
-            user_id: user.user_id,
-            type: prize,
-          },
-        });
-      }
-
-      return { success: 'ok', status_code: 200, error: '', data: '' };
+      return { statusCode: 200, message: 'ok' };
     } catch (err) {
-      return { error: 'unknown error', status_code: 400, status: null };
+      return { statusCode: 500, message: 'Internal server error.' };
     }
   }
 
-  private checkSign(params: ISignData): boolean {
-    let selfSign: string;
+  private async applyVoteReward(username: string): Promise<void> {
+    const prize: string = this.getPrize();
 
-    if (params.project) {
-      const secretString = [
-        params.project,
-        process.env.SECRET_KEY_FOR_VOTE_MINESERV,
-        params.timestamp,
-        params.username,
-      ].join('.');
+    const dataToBot = {
+      username: username,
+      prize: prize,
+    };
 
-      selfSign = crypto.createHash('sha256').update(secretString).digest('hex');
-    } else {
-      const secretString =
-        params.username + params.timestamp + process.env.SECRET_KEY_FOR_VOTE_HOTMC;
+    this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST');
 
-      selfSign = crypto.createHash('sha1').update(secretString).digest('hex');
+    const user = await this.prismaService.users.findFirst({
+      where: {
+        username: username,
+      },
+      select: {
+        user_id: true,
+        balance: true,
+      },
+    });
+
+    if (!user?.user_id) {
+      return;
     }
 
-    return params.signature !== selfSign;
+    await this.prismaService.users.update({
+      where: {
+        username: username,
+      },
+      data: {
+        balance: user.balance + 5,
+      },
+    });
+
+    if (prize && prize !== 'money') {
+      await this.prismaService.awards.create({
+        data: {
+          user_id: user.user_id,
+          type: prize,
+        },
+      });
+    }
   }
 
   private getPrize(): string {

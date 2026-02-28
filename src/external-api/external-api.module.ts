@@ -3,6 +3,7 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
 import { BullModule } from '@nestjs/bull';
 import { ExternalApiController } from './external-api.controller';
 import { ExternalApiService } from './external-api.service';
+import { VoteValidationService } from './vote-validation.service';
 import { UsersModule } from '../users/users.module';
 import { UtilsService } from '../Utils/utils.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
@@ -19,6 +20,6 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
   ],
   controllers: [ExternalApiController],
-  providers: [ExternalApiService, UtilsService, DataProviderService, LogsService],
+  providers: [ExternalApiService, VoteValidationService, UtilsService, DataProviderService, LogsService],
 })
 export class ExternalApiModule {}

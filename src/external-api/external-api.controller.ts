@@ -99,13 +99,8 @@ export class ExternalApiController {
   @FormDataRequest()
   async voteHandler(@Request() req, @Response() res, @Body() body): Promise<any> {
     const response = await this.externalApiService.voteHandler(body);
-
-    if (response.error) {
-      res.status(HttpStatus.BAD_REQUEST).json(response);
-      return;
-    }
-
-    res.send(response.success);
+    res.type('text/plain');
+    res.status(response.statusCode).send(response.message);
   }
 
   @SetMetadata('role', 'bot')
