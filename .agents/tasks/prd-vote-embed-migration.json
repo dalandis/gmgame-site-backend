@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "project": "Vote Discord Embed Migration",
+  "overview": "Migrate the vote notification Discord message format from the legacy bot to ../GMGameBot while preserving existing site integration and reward flow. Keep API compatibility for current payloads and add monitoring propagation from site backend when available.",
+  "goals": [
+    "Reproduce legacy vote notification style in new bot send_embed route",
+    "Preserve existing backend reward/balance behavior",
+    "Maintain payload compatibility for existing callers",
+    "Ensure graceful handling for missing monitoring and empty username"
+  ],
+  "nonGoals": [
+    "Do not migrate or reimplement legacy RCON reward issuance logic",
+    "Do not migrate or reimplement random win/prize logic from legacy bot",
+    "Do not modify production configs, secrets, or deployment environment"
+  ],
+  "successMetrics": [
+    "After vote flow completion, Discord receives message in legacy style through ../GMGameBot",
+    "POST /send_embed accepts existing payload shape without runtime errors",
+    "Site reward application and balance update behavior remains unchanged",
+    "All required quality gates pass"
+  ],
+  "openQuestions": [
+    "None blocking based on current requirements; legacy button labels and URLs must be copied 1:1 from legacy route"
+  ],
+  "stack": {
+    "framework": "Existing Node.js/TypeScript backend + Node.js bot service",
+    "hosting": "Existing self-hosted/server deployment (unchanged)",
+    "database": "Existing project database (unchanged for this feature)",
+    "auth": "Existing internal service API usage between site backend and bot API (no auth model changes)"
+  },
+  "routes": [
+    {
+      "path": "/api/vote_handler",
+      "name": "Site Vote Handler",
+      "purpose": "Accept vote callback and trigger reward + bot notification flow"
+    },
+    {
+      "path": "/send_embed",
+      "name": "Bot Embed Sender",
+      "purpose": "Receive vote payload and post formatted Discord notification"
+    }
+  ],
+  "uiNotes": [
+    "Discord message content (embed title/description/buttons/text) must match legacy old-bot format exactly",
+    "When monitoring is missing, message text must use fallback phrase '\u043d\u0430 \u043e\u0434\u043d\u043e\u043c \u0438\u0437 \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u043e\u0432'",
+    "When username is missing/empty in bot payload, display name fallback must be '\u0418\u0433\u0440\u043e\u043a'"
+  ],
+  "dataModel": [
+    {
+      "entity": "SendEmbedPayload",
+      "fields": [
+        "username (string, optional)",
+        "prize (string, optional, existing field)",
+        "monitoring (string, optional)"
+      ]
+    },
+    {
+      "entity": "VoteContext",
+      "fields": [
+        "vote username/user identifier",
+        "monitoring source if available",
+        "reward metadata (unchanged)"
+      ]
+    }
+  ],
+  "importFormat": {
+    "description": "Not applicable for external file import. Internal JSON payload from site backend to bot API.",
+    "example": {
+      "username": "Player123",
+      "prize": "money",
+      "monitoring": "topcraft"
+    }
+  },
+  "rules": [
+    "POST /send_embed must support payload with username only (current caller contract)",
+    "POST /send_embed must not require monitoring; if absent, use text fallback '\u043d\u0430 \u043e\u0434\u043d\u043e\u043c \u0438\u0437 \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u043e\u0432'",
+    "Bot route supports username as canonical name source; if empty or whitespace-only, use fallback '\u0418\u0433\u0440\u043e\u043a'",
+    "Legacy embed/button/text structure must be ported to new bot route without introducing reward/RCON/random logic",
+    "Site backend should pass monitoring to send_embed when available in vote handler context",
+    "Any backend changes must not alter existing reward issuance and balance update behavior"
+  ],
+  "qualityGates": [
+    "npm test",
+    "npm run lint",
+    "npm run build"
+  ],
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Port legacy Discord vote embed format into new bot send route",
+      "status": "in_progress",
+      "dependsOn": [],
+      "description": "As a community member, I want vote notifications in Discord to keep the familiar rich format so announcements remain recognizable and actionable.",
+      "acceptanceCriteria": [
+        "In ../GMGameBot POST /send_embed, replace current embed/button content with legacy format from old Discord_helper/routes/vote_handler.js including title, description, text and button set",
+        "Button labels and URLs are copied from legacy implementation 1:1",
+        "Example: payload { \"username\": \"Player123\", \"monitoring\": \"topcraft\" } posts a Discord message matching legacy style and includes monitoring-specific wording",
+        "Negative case: payload with missing monitoring still posts successfully and uses fallback phrase '\u043d\u0430 \u043e\u0434\u043d\u043e\u043c \u0438\u0437 \u043c\u043e\u043d\u0438\u0442\u043e\u0440\u0438\u043d\u0433\u043e\u0432' instead of blank or malformed text",
+        "No RCON, random reward, or prize issuance logic from legacy file is introduced in new bot route"
+      ],
+      "startedAt": "2026-03-02T13:00:37.392759+00:00",
+      "completedAt": null,
+      "updatedAt": "2026-03-02T13:00:37.392937+00:00"
+    },
+    {
+      "id": "US-002",
+      "title": "Keep send_embed payload compatibility and add username guard",
+      "status": "open",
+      "dependsOn": [
+        "US-001"
+      ],
+      "description": "As an integrator, I want send_embed to remain compatible with existing caller payloads so current site requests continue to work without regressions.",
+      "acceptanceCriteria": [
+        "POST /send_embed continues accepting payload with field username only",
+        "Input normalization for username is added: empty string, null, undefined, or whitespace resolves to fallback '\u0418\u0433\u0440\u043e\u043a'",
+        "Example: payload { \"username\": \"Player123\" } posts message successfully with player name 'Player123'",
+        "Negative case: payload { \"username\": \"   \" } does not crash and posts message with name '\u0418\u0433\u0440\u043e\u043a'",
+        "Route returns non-error response for compatible old payload shape used by site backend"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Propagate monitoring from site vote flow to bot API",
+      "status": "open",
+      "dependsOn": [
+        "US-002"
+      ],
+      "description": "As a backend maintainer, I want monitoring to be passed to send_embed when available so Discord notifications can reference source monitoring accurately.",
+      "acceptanceCriteria": [
+        "In gmgame-site-backend vote flow, update send_embed request payload to include monitoring when available in vote handler context",
+        "Existing reward application and balance update logic remains behaviorally unchanged",
+        "Example: vote handler context with username='Player123' and monitoring='topcraft' results in bot API payload containing both username and monitoring",
+        "Negative case: when monitoring is absent, backend still sends valid payload and reward flow completes without errors",
+        "No production config/secret changes are made"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Add automated tests for compatibility scenarios",
+      "status": "open",
+      "dependsOn": [
+        "US-003"
+      ],
+      "description": "As a developer, I want unit tests in gmgame-site-backend to cover payload compatibility scenarios so regressions are caught quickly.",
+      "acceptanceCriteria": [
+        "Add or update unit tests in gmgame-site-backend for: payload only with username; payload including user + monitoring context mapping to outgoing payload; absence of monitoring",
+        "Tests assert outgoing bot payload and that reward-related code path is not broken by monitoring propagation changes",
+        "Example: test case with username-only input verifies send_embed call still occurs with backward-compatible payload and reward processing path",
+        "Negative case: test case with missing monitoring verifies fallback/optional behavior and no thrown error",
+        "Project passes quality gates: npm test, npm run lint, npm run build"
+      ]
+    }
+  ]
+}

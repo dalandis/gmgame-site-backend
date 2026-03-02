@@ -113,10 +113,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
   });
 
   it('returns 200 ok for valid HotMC payload', async () => {
-    const sign = crypto
-      .createHash('sha1')
-      .update('Alex1700000010hotmc-token')
-      .digest('hex');
+    const sign = crypto.createHash('sha1').update('Alex1700000010hotmc-token').digest('hex');
 
     const res = makeRes();
 
@@ -127,28 +124,22 @@ describe('ExternalApiController vote_handler (e2e)', () => {
   });
 
   it('returns 200 ok for legacy username/timestamp/signature payload', async () => {
-    const signature = crypto
-      .createHash('sha1')
-      .update('Alex1700000010hotmc-token')
-      .digest('hex');
+    const signature = crypto.createHash('sha1').update('Alex1700000010hotmc-token').digest('hex');
 
     const res = makeRes();
 
-    await controller.voteHandler(
-      {} as any,
-      res as any,
-      { username: 'Alex', timestamp: '1700000010', signature },
-    );
+    await controller.voteHandler({} as any, res as any, {
+      username: 'Alex',
+      timestamp: '1700000010',
+      signature,
+    });
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith('ok');
   });
 
   it('returns 200 ok for valid MCLike payload', async () => {
-    const sign = crypto
-      .createHash('sha1')
-      .update('Alex1700000011mclike-token')
-      .digest('hex');
+    const sign = crypto.createHash('sha1').update('Alex1700000011mclike-token').digest('hex');
 
     const res = makeRes();
 
@@ -159,10 +150,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
   });
 
   it('returns 200 ok for valid MinecraftRating payload', async () => {
-    const signature = crypto
-      .createHash('sha1')
-      .update('Steve1700000012rating-token')
-      .digest('hex');
+    const signature = crypto.createHash('sha1').update('Steve1700000012rating-token').digest('hex');
 
     const res = makeRes();
 
@@ -209,10 +197,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
   });
 
   it('adds only 5 coins to balance for valid requests', async () => {
-    const sign = crypto
-      .createHash('sha1')
-      .update('Alex1700000010hotmc-token')
-      .digest('hex');
+    const sign = crypto.createHash('sha1').update('Alex1700000010hotmc-token').digest('hex');
 
     const res = makeRes();
 

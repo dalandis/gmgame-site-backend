@@ -208,14 +208,22 @@ export class ShopService {
         await this.compensateFailedDelivery(userId, item, result.purchaseId);
 
         this.logger.error(
-          `[SHOP_DELIVERY_FAILED] purchaseId=${result.purchaseId} userId=${userId} itemId=${item.id} gameId=${item.gameId} error=${deliveryResult.error} command=${deliveryResult.command ?? 'n/a'}`,
+          `[SHOP_DELIVERY_FAILED] purchaseId=${result.purchaseId} userId=${userId} itemId=${
+            item.id
+          } gameId=${item.gameId} error=${deliveryResult.error} command=${
+            deliveryResult.command ?? 'n/a'
+          }`,
         );
 
-        return { error: 'Покупка отменена: не удалось выдать предмет в игре. Баланс восстановлен.' };
+        return {
+          error: 'Покупка отменена: не удалось выдать предмет в игре. Баланс восстановлен.',
+        };
       }
 
       this.logger.log(
-        `[SHOP_DELIVERY_SUCCESS] purchaseId=${result.purchaseId} userId=${userId} itemId=${item.id} command=${deliveryResult.command ?? 'hidden'}`,
+        `[SHOP_DELIVERY_SUCCESS] purchaseId=${result.purchaseId} userId=${userId} itemId=${
+          item.id
+        } command=${deliveryResult.command ?? 'hidden'}`,
       );
     }
 
@@ -337,7 +345,11 @@ export class ShopService {
     return normalized;
   }
 
-  private async compensateFailedDelivery(userId: string, item: shopItems, purchaseId: number): Promise<void> {
+  private async compensateFailedDelivery(
+    userId: string,
+    item: shopItems,
+    purchaseId: number,
+  ): Promise<void> {
     try {
       await this.withSerializableRetry(async () =>
         this.prismaService.$transaction(

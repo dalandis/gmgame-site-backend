@@ -20,6 +20,12 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
   ],
   controllers: [ExternalApiController],
-  providers: [ExternalApiService, VoteValidationService, UtilsService, DataProviderService, LogsService],
+  providers: [
+    ExternalApiService,
+    VoteValidationService,
+    UtilsService,
+    DataProviderService,
+    LogsService,
+  ],
 })
 export class ExternalApiModule {}

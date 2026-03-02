@@ -47,7 +47,10 @@ export class VoteValidationService {
     return this.validateInternal(payload, true);
   }
 
-  private validateInternal(payload: Record<string, any>, includeDebug: boolean): VoteValidationResult {
+  private validateInternal(
+    payload: Record<string, any>,
+    includeDebug: boolean,
+  ): VoteValidationResult {
     const baseDebug: VoteValidationDebugInfo = {
       payloadKeys: this.getPayloadKeys(payload),
       detectedFormat: 'unknown',
@@ -79,7 +82,9 @@ export class VoteValidationService {
         return this.buildError('invalid_signature', includeDebug, {
           ...baseDebug,
           ...signatureDebug,
-          tokenConfigured: { mineserv: this.hasConfiguredToken(process.env.SECRET_KEY_FOR_VOTE_MINESERV) },
+          tokenConfigured: {
+            mineserv: this.hasConfiguredToken(process.env.SECRET_KEY_FOR_VOTE_MINESERV),
+          },
           signatureChecks: [{ monitoring: 'mineserv', algorithm: 'sha256', matched: false }],
         });
       }
@@ -109,7 +114,9 @@ export class VoteValidationService {
 
       const expected = crypto
         .createHash('sha1')
-        .update(`${payload.username}${payload.timestamp}${process.env.SECRET_KEY_FOR_VOTE_MINECRAFTRATING}`)
+        .update(
+          `${payload.username}${payload.timestamp}${process.env.SECRET_KEY_FOR_VOTE_MINECRAFTRATING}`,
+        )
         .digest('hex');
 
       const signatureDebug = this.getSignatureDebug(String(payload.signature), expected);
@@ -120,7 +127,9 @@ export class VoteValidationService {
           ...baseDebug,
           ...signatureDebug,
           tokenConfigured: {
-            minecraftrating: this.hasConfiguredToken(process.env.SECRET_KEY_FOR_VOTE_MINECRAFTRATING),
+            minecraftrating: this.hasConfiguredToken(
+              process.env.SECRET_KEY_FOR_VOTE_MINECRAFTRATING,
+            ),
           },
           signatureChecks: [{ monitoring: 'minecraftrating', algorithm: 'sha1', matched: false }],
         });
@@ -268,8 +277,12 @@ export class VoteValidationService {
   }
 
   private safeCompareHex(left: string, right: string): boolean {
-    const normalizedLeft = String(left || '').trim().toLowerCase();
-    const normalizedRight = String(right || '').trim().toLowerCase();
+    const normalizedLeft = String(left || '')
+      .trim()
+      .toLowerCase();
+    const normalizedRight = String(right || '')
+      .trim()
+      .toLowerCase();
 
     if (!this.isHex(normalizedLeft) || !this.isHex(normalizedRight)) {
       return false;
@@ -314,7 +327,9 @@ export class VoteValidationService {
   }
 
   private normalizeHex(value: string): string {
-    return String(value || '').trim().toLowerCase();
+    return String(value || '')
+      .trim()
+      .toLowerCase();
   }
 
   private createHash(algorithm: HashAlgorithm, input: string): string {
@@ -329,7 +344,10 @@ export class VoteValidationService {
     return typeof token === 'string' && token.trim().length > 0;
   }
 
-  private getSignatureDebug(signature: string, expected: string): Pick<VoteValidationDebugInfo, 'signatureLength' | 'signatureIsHex'> {
+  private getSignatureDebug(
+    signature: string,
+    expected: string,
+  ): Pick<VoteValidationDebugInfo, 'signatureLength' | 'signatureIsHex'> {
     const normalizedSignature = this.normalizeHex(signature);
     const normalizedExpected = this.normalizeHex(expected);
     return {

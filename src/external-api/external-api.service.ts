@@ -325,7 +325,11 @@ export class ExternalApiService {
           return { statusCode: 400, message: 'Transmitted data did not pass validation.' };
         }
 
-        return { statusCode: 400, message: 'Required data not transmitted.', errorType: validation.error };
+        return {
+          statusCode: 400,
+          message: 'Required data not transmitted.',
+          errorType: validation.error,
+        };
       }
 
       this.logger.log(
