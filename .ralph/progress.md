@@ -63,3 +63,37 @@ Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-1
   - Useful context
   - Required activity logging is available through `ralph log "message"`.
 ---
+## [2026-03-02 17:14 +0400] - US-003: Propagate monitoring from site vote flow to bot API
+Thread: 
+Run: 20260302-170037-35578 (iteration 3)
+Run log: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-3.log
+Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: d226602 fix(vote-handler): pass monitoring to send_embed
+- Post-commit status: `clean`
+- Verification:
+  - Command: npm test -> PASS
+  - Command: npm run lint -> FAIL
+  - Command: npm run build -> PASS
+- Files changed:
+  - src/external-api/external-api.service.ts
+  - src/external-api/external-api.vote-handler.e2e.spec.ts
+  - .ralph/guardrails.md
+  - .agents/tasks/prd-vote-embed-migration.json
+  - .ralph/.tmp/prompt-20260302-170037-35578-3.md
+  - .ralph/.tmp/story-20260302-170037-35578-3.json
+  - .ralph/.tmp/story-20260302-170037-35578-3.md
+  - .ralph/runs/run-20260302-170037-35578-iter-2.md
+- What was implemented
+  - Updated vote handler flow to pass `monitoring` from validated vote context into `applyVoteReward` and include it in `send_embed` payload only when present.
+  - Kept reward behavior unchanged: still sends `prize: 'money'`, looks up user by username, and increments balance by 5.
+  - Expanded vote_handler e2e coverage to assert positive payload includes both `username` and `monitoring`, and negative path without monitoring still succeeds and updates balance.
+- **Learnings for future iterations:**
+  - Patterns discovered
+  - Vote validation already provides monitoring for known formats; optional payload spreading keeps backward compatibility if monitoring is absent.
+  - Gotchas encountered
+  - `npm run lint` continues to fail on pre-existing unrelated files (`admin`, `auth`, `main`) and not on US-003 files.
+  - Useful context
+  - Activity logging helper path in this repo is `./.agents/ralph/log-activity.sh`.
+---
