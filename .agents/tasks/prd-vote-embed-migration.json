@@ -88,7 +88,7 @@
     {
       "id": "US-001",
       "title": "Port legacy Discord vote embed format into new bot send route",
-      "status": "in_progress",
+      "status": "done",
       "dependsOn": [],
       "description": "As a community member, I want vote notifications in Discord to keep the familiar rich format so announcements remain recognizable and actionable.",
       "acceptanceCriteria": [
@@ -99,13 +99,13 @@
         "No RCON, random reward, or prize issuance logic from legacy file is introduced in new bot route"
       ],
       "startedAt": "2026-03-02T13:00:37.392759+00:00",
-      "completedAt": null,
-      "updatedAt": "2026-03-02T13:00:37.392937+00:00"
+      "completedAt": "2026-03-02T13:05:48.811670+00:00",
+      "updatedAt": "2026-03-02T13:05:48.811188+00:00"
     },
     {
       "id": "US-002",
       "title": "Keep send_embed payload compatibility and add username guard",
-      "status": "open",
+      "status": "in_progress",
       "dependsOn": [
         "US-001"
       ],
@@ -116,7 +116,10 @@
         "Example: payload { \"username\": \"Player123\" } posts message successfully with player name 'Player123'",
         "Negative case: payload { \"username\": \"   \" } does not crash and posts message with name '\u0418\u0433\u0440\u043e\u043a'",
         "Route returns non-error response for compatible old payload shape used by site backend"
-      ]
+      ],
+      "startedAt": "2026-03-02T13:05:50.912051+00:00",
+      "completedAt": null,
+      "updatedAt": "2026-03-02T13:05:50.912346+00:00"
     },
     {
       "id": "US-003",

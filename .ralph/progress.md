@@ -34,3 +34,32 @@ Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-1
   - Useful context
   - Backend lint currently fails with pre-existing ESLint errors unrelated to US-001.
 ---
+## [2026-03-02 17:08 +0400] - US-002: Keep send_embed payload compatibility and add username guard
+Thread: 
+Run: 20260302-170037-35578 (iteration 2)
+Run log: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-2.log
+Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: <pending>
+- Post-commit status: `<pending>`
+- Verification:
+  - Command: npm test -> PASS
+  - Command: npm run lint -> FAIL
+  - Command: npm run build -> PASS
+- Files changed:
+  - ../GMGameBot/routes.js
+  - .ralph/activity.log
+  - .ralph/progress.md
+- What was implemented
+  - Updated `POST /send_embed` in `../GMGameBot/routes.js` to normalize `username` and preserve compatibility with payloads that only include `username`.
+  - Added username guard: when `username` is empty string, null, undefined, or whitespace-only, route now uses fallback display name `Игрок`.
+  - Applied normalized username in both message content and embed title so positive and negative compatibility cases render correctly without route errors.
+- **Learnings for future iterations:**
+  - Patterns discovered
+  - Bot route compatibility changes can be implemented in `../GMGameBot` while run tracking and commits remain in this repo.
+  - Gotchas encountered
+  - `npm run lint` fails due to pre-existing issues in unrelated files; story changes did not introduce new lint failures.
+  - Useful context
+  - Required activity logging is available through `ralph log "message"`.
+---
