@@ -18,3 +18,8 @@
 
 ## Learned Signs
 
+
+### Sign: Differentiate Baseline Lint Noise
+- **Trigger**: When `npm run lint` fails during story work
+- **Instruction**: Separate pre-existing lint failures from story-impacting files and only fix lint issues in scope for the selected story
+- **Added after**: Iteration 2 - repeated unrelated ESLint failures blocked clean lint gate
