@@ -28,3 +28,8 @@
 - **Trigger**: When the same unrelated lint failures repeat in a later iteration
 - **Instruction**: Append the repeated failure details to `.ralph/errors.log` and explicitly note whether current story files are unaffected
 - **Added after**: Iteration 3 - baseline lint errors repeated with no overlap to US-003 files
+
+### Sign: Keep Lint Fixes In Story Scope
+- **Trigger**: When global lint gate fails from known baseline files during a scoped story
+- **Instruction**: Do not fix unrelated lint files just to satisfy the gate; verify touched story files are clean and record baseline failures
+- **Added after**: Iteration 4 - repeated baseline lint errors while completing US-004 tests

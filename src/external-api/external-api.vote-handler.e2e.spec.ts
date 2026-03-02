@@ -234,7 +234,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
     expect(prismaMock.awards.create).not.toHaveBeenCalled();
   });
 
-  it('sends embed payload without monitoring when missing in context', async () => {
+  it('keeps backward compatibility for username-only payload', async () => {
     jest.spyOn(voteValidationService, 'validateWithDebug').mockReturnValueOnce({
       ok: true,
       data: {
@@ -249,6 +249,40 @@ describe('ExternalApiController vote_handler (e2e)', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith('ok');
+    expect(dataProviderMock.sendToBot).toHaveBeenCalledWith(
+      {
+        username: 'Alex',
+        prize: 'money',
+      },
+      'send_embed',
+      'POST',
+    );
+    expect(prismaMock.users.update).toHaveBeenCalledWith({
+      where: {
+        username: 'Alex',
+      },
+      data: {
+        balance: 15,
+      },
+    });
+    expect(prismaMock.awards.create).not.toHaveBeenCalled();
+  });
+
+  it('does not throw when monitoring is missing in vote context', async () => {
+    jest.spyOn(voteValidationService, 'validateWithDebug').mockReturnValueOnce({
+      ok: true,
+      data: {
+        username: 'Alex',
+        timestamp: '1700000010',
+      } as any,
+    } as any);
+
+    const res = makeRes();
+
+    await expect(controller.voteHandler({} as any, res as any, { username: 'Alex' })).resolves.toBe(
+      undefined,
+    );
+
     expect(dataProviderMock.sendToBot).toHaveBeenCalledWith(
       {
         username: 'Alex',
