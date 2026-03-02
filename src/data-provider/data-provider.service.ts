@@ -25,10 +25,12 @@ export class DataProviderService {
   }
 
   public async sendToServerApi<T>(payload: T, url: string, method: string): Promise<AxiosResponse> {
+    const targetUrl = this.joinUrl(process.env.URL_FOR_SERVER_API, url);
+
     return axios.request({
       data: JSON.stringify(payload),
       method: method,
-      url: process.env.URL_FOR_SERVER_API + url,
+      url: targetUrl,
       headers: {
         Authorization: 'Bearer ' + process.env.TOKEN_FOR_SERVER_API,
         'Content-type': 'application/json',
@@ -41,10 +43,12 @@ export class DataProviderService {
     url: string,
     method: string,
   ): Promise<AxiosResponse> {
+    const targetUrl = this.joinUrl(process.env.URL_FOR_SERVER_API_NEW, url);
+
     return axios.request({
       data: JSON.stringify(payload),
       method: method,
-      url: process.env.URL_FOR_SERVER_API_NEW + url,
+      url: targetUrl,
       headers: {
         Authorization: 'Bearer ' + process.env.TOKEN_FOR_SERVER_API,
         'Content-type': 'application/json',
@@ -90,5 +94,12 @@ export class DataProviderService {
         console.log(error);
         return { id: 'error' };
       });
+  }
+
+  private joinUrl(baseUrl: string | undefined, path: string): string {
+    const base = (baseUrl ?? '').replace(/\/+$/, '');
+    const normalizedPath = path.replace(/^\/+/, '');
+
+    return `${base}/${normalizedPath}`;
   }
 }

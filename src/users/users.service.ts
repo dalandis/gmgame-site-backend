@@ -140,7 +140,7 @@ export class UsersService {
       username: user.username,
     };
 
-    const result = await this.dataProviderService.sendToServerApi(
+    const result = await this.dataProviderService.sendToServerApiNew(
       payload,
       '/change_password_new',
       'POST',

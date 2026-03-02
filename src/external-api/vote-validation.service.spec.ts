@@ -70,4 +70,17 @@ describe('VoteValidationService', () => {
     expect(result.ok).toBe(true);
     expect(result.data.monitoring).toBe('hotmc');
   });
+
+  it('accepts md5 signature for hotmc payload', () => {
+    const payload = {
+      nick: 'Alex',
+      time: '1700000010',
+      sign: crypto.createHash('md5').update('Alex1700000010hotmc-token').digest('hex'),
+    };
+
+    const result = service.validate(payload);
+
+    expect(result.ok).toBe(true);
+    expect(result.data.monitoring).toBe('hotmc');
+  });
 });

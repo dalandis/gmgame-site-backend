@@ -208,7 +208,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
     expect(res.send).toHaveBeenCalledWith('Required data not transmitted.');
   });
 
-  it('calls existing reward logic for valid requests', async () => {
+  it('adds only 5 coins to balance for valid requests', async () => {
     const sign = crypto
       .createHash('sha1')
       .update('Alex1700000010hotmc-token')
@@ -221,7 +221,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
     expect(dataProviderMock.sendToBot).toHaveBeenCalledWith(
       {
         username: 'Alex',
-        prize: '',
+        prize: 'money',
       },
       'send_embed',
       'POST',
@@ -243,5 +243,6 @@ describe('ExternalApiController vote_handler (e2e)', () => {
         balance: 15,
       },
     });
+    expect(prismaMock.awards.create).not.toHaveBeenCalled();
   });
 });

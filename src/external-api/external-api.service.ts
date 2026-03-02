@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   createUserDto,
   checkUserDto,
@@ -37,6 +37,8 @@ interface Terr {
 
 @Injectable()
 export class ExternalApiService {
+  private readonly logger = new Logger(ExternalApiService.name);
+
   constructor(
     private readonly userService: UsersService,
     private readonly utilsService: UtilsService,
@@ -309,9 +311,16 @@ export class ExternalApiService {
     params: Record<string, any>,
   ): Promise<{ statusCode: number; message: string; errorType?: string }> {
     try {
-      const validation = this.voteValidationService.validate(params);
+      const validation = this.voteValidationService.validateWithDebug(params);
 
       if (!validation.ok) {
+        this.logger.warn(
+          `[vote_handler] Validation failed: ${JSON.stringify({
+            error: validation.error,
+            debug: validation.debug,
+          })}`,
+        );
+
         if (validation.error === 'invalid_signature') {
           return { statusCode: 400, message: 'Transmitted data did not pass validation.' };
         }
@@ -319,23 +328,32 @@ export class ExternalApiService {
         return { statusCode: 400, message: 'Required data not transmitted.', errorType: validation.error };
       }
 
+      this.logger.log(
+        `[vote_handler] Vote accepted: ${JSON.stringify({
+          monitoring: validation.data.monitoring,
+          username: validation.data.username,
+          timestamp: validation.data.timestamp,
+        })}`,
+      );
+
       await this.applyVoteReward(validation.data.username);
 
       return { statusCode: 200, message: 'ok' };
     } catch (err) {
+      this.logger.error(`[vote_handler] Unhandled error: ${err?.message || err}`, err?.stack);
       return { statusCode: 500, message: 'Internal server error.' };
     }
   }
 
   private async applyVoteReward(username: string): Promise<void> {
-    const prize: string = this.getPrize();
-
-    const dataToBot = {
-      username: username,
-      prize: prize,
-    };
-
-    this.dataProviderService.sendToBot(dataToBot, 'send_embed', 'POST');
+    this.dataProviderService.sendToBot(
+      {
+        username: username,
+        prize: 'money',
+      },
+      'send_embed',
+      'POST',
+    );
 
     const user = await this.prismaService.users.findFirst({
       where: {
@@ -359,27 +377,6 @@ export class ExternalApiService {
         balance: user.balance + 5,
       },
     });
-
-    if (prize && prize !== 'money') {
-      await this.prismaService.awards.create({
-        data: {
-          user_id: user.user_id,
-          type: prize,
-        },
-      });
-    }
-  }
-
-  private getPrize(): string {
-    if (Math.random() < Number(process.env.CHANCE_TOOLS)) {
-      return 'tools';
-    }
-
-    if (Math.random() < Number(process.env.CHANCE_MONEY)) {
-      return 'money';
-    }
-
-    return '';
   }
 
   async getLocations(
