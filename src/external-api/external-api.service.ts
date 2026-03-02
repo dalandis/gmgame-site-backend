@@ -13,7 +13,7 @@ import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { LogsService } from '../logs/logs.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { VoteValidationService } from './vote-validation.service';
+import { MonitoringType, VoteValidationService } from './vote-validation.service';
 
 ConfigModule.forRoot({
   envFilePath: '.env.api',
@@ -340,7 +340,7 @@ export class ExternalApiService {
         })}`,
       );
 
-      await this.applyVoteReward(validation.data.username);
+      await this.applyVoteReward(validation.data.username, validation.data.monitoring);
 
       return { statusCode: 200, message: 'ok' };
     } catch (err) {
@@ -349,11 +349,12 @@ export class ExternalApiService {
     }
   }
 
-  private async applyVoteReward(username: string): Promise<void> {
+  private async applyVoteReward(username: string, monitoring?: MonitoringType): Promise<void> {
     this.dataProviderService.sendToBot(
       {
         username: username,
         prize: 'money',
+        ...(monitoring ? { monitoring } : {}),
       },
       'send_embed',
       'POST',

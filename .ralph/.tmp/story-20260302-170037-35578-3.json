@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "total": 4,
+  "remaining": 2,
+  "quality_gates": [
+    "npm test",
+    "npm run lint",
+    "npm run build"
+  ],
+  "id": "US-003",
+  "title": "Propagate monitoring from site vote flow to bot API"
+}

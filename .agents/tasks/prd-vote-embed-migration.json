@@ -105,7 +105,7 @@
     {
       "id": "US-002",
       "title": "Keep send_embed payload compatibility and add username guard",
-      "status": "in_progress",
+      "status": "done",
       "dependsOn": [
         "US-001"
       ],
@@ -118,13 +118,13 @@
         "Route returns non-error response for compatible old payload shape used by site backend"
       ],
       "startedAt": "2026-03-02T13:05:50.912051+00:00",
-      "completedAt": null,
-      "updatedAt": "2026-03-02T13:05:50.912346+00:00"
+      "completedAt": "2026-03-02T13:09:52.456297+00:00",
+      "updatedAt": "2026-03-02T13:09:52.455817+00:00"
     },
     {
       "id": "US-003",
       "title": "Propagate monitoring from site vote flow to bot API",
-      "status": "open",
+      "status": "in_progress",
       "dependsOn": [
         "US-002"
       ],
@@ -135,7 +135,10 @@
         "Example: vote handler context with username='Player123' and monitoring='topcraft' results in bot API payload containing both username and monitoring",
         "Negative case: when monitoring is absent, backend still sends valid payload and reward flow completes without errors",
         "No production config/secret changes are made"
-      ]
+      ],
+      "startedAt": "2026-03-02T13:09:54.563158+00:00",
+      "completedAt": null,
+      "updatedAt": "2026-03-02T13:09:54.563346+00:00"
     },
     {
       "id": "US-004",

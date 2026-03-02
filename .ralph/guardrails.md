@@ -23,3 +23,8 @@
 - **Trigger**: When `npm run lint` fails during story work
 - **Instruction**: Separate pre-existing lint failures from story-impacting files and only fix lint issues in scope for the selected story
 - **Added after**: Iteration 2 - repeated unrelated ESLint failures blocked clean lint gate
+
+### Sign: Record Baseline Lint Repeat
+- **Trigger**: When the same unrelated lint failures repeat in a later iteration
+- **Instruction**: Append the repeated failure details to `.ralph/errors.log` and explicitly note whether current story files are unaffected
+- **Added after**: Iteration 3 - baseline lint errors repeated with no overlap to US-003 files

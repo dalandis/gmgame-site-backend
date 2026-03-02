@@ -14,6 +14,7 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
 describe('ExternalApiController vote_handler (e2e)', () => {
   let moduleRef: TestingModule;
   let controller: ExternalApiController;
+  let voteValidationService: VoteValidationService;
 
   const dataProviderMock = {
     sendToBot: jest.fn(),
@@ -86,6 +87,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
     }).compile();
 
     controller = moduleRef.get<ExternalApiController>(ExternalApiController);
+    voteValidationService = moduleRef.get<VoteValidationService>(VoteValidationService);
   });
 
   afterEach(async () => {
@@ -207,6 +209,7 @@ describe('ExternalApiController vote_handler (e2e)', () => {
       {
         username: 'Alex',
         prize: 'money',
+        monitoring: 'hotmc',
       },
       'send_embed',
       'POST',
@@ -229,5 +232,38 @@ describe('ExternalApiController vote_handler (e2e)', () => {
       },
     });
     expect(prismaMock.awards.create).not.toHaveBeenCalled();
+  });
+
+  it('sends embed payload without monitoring when missing in context', async () => {
+    jest.spyOn(voteValidationService, 'validateWithDebug').mockReturnValueOnce({
+      ok: true,
+      data: {
+        username: 'Alex',
+        timestamp: '1700000010',
+      } as any,
+    } as any);
+
+    const res = makeRes();
+
+    await controller.voteHandler({} as any, res as any, { username: 'Alex' });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith('ok');
+    expect(dataProviderMock.sendToBot).toHaveBeenCalledWith(
+      {
+        username: 'Alex',
+        prize: 'money',
+      },
+      'send_embed',
+      'POST',
+    );
+    expect(prismaMock.users.update).toHaveBeenCalledWith({
+      where: {
+        username: 'Alex',
+      },
+      data: {
+        balance: 15,
+      },
+    });
   });
 });
