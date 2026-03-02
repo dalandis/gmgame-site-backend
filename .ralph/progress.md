@@ -41,8 +41,8 @@ Run log: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-17003
 Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-2.md
 - Guardrails reviewed: yes
 - No-commit run: false
-- Commit: <pending>
-- Post-commit status: `<pending>`
+- Commit: 4c22d32 chore(ralph): record US-002 run artifacts
+- Post-commit status: `clean`
 - Verification:
   - Command: npm test -> PASS
   - Command: npm run lint -> FAIL
