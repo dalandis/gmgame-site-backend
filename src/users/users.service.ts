@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../validator/create.user';
 import { v4 as uuidv4 } from 'uuid';
 import { IUsers } from '../common/types/users.model';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class UsersService {
@@ -140,17 +141,25 @@ export class UsersService {
       username: user.username,
     };
 
-    const result = await this.dataProviderService.sendToServerApiNew(
-      payload,
-      '/change_password_new',
-      'POST',
-    );
+    try {
+      const result = await this.dataProviderService.sendToServerApi(
+        payload,
+        '/change_password_new',
+        'POST',
+      );
 
-    if (result.status != 200) {
-      return { error: `Ошибка изменения пароля: ${result.status}` };
+      if (result.status != 200) {
+        return { error: `Ошибка изменения пароля: ${result.status}` };
+      }
+
+      return { message: 'Пароль изменен' };
+    } catch (error) {
+      const axiosError = error as AxiosError<{ error?: string }>;
+      const status = axiosError.response?.status ?? 'unknown';
+      const upstreamError = axiosError.response?.data?.error ?? axiosError.message;
+
+      return { error: `Ошибка изменения пароля: ${status}. ${upstreamError}` };
     }
-
-    return { message: 'Пароль изменен' };
   }
 
   async resubmit(reqUser) {
