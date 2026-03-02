@@ -97,3 +97,37 @@ Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-1
   - Useful context
   - Activity logging helper path in this repo is `./.agents/ralph/log-activity.sh`.
 ---
+## [2026-03-02 17:18 +0400] - US-004: Add automated tests for compatibility scenarios
+Thread: 
+Run: 20260302-170037-35578 (iteration 4)
+Run log: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-4.log
+Run summary: /Volumes/Data/gmgame/gmgame-site-backend/.ralph/runs/run-20260302-170037-35578-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 80bdc88 test(vote-handler): cover payload compatibility paths
+- Post-commit status: `clean`
+- Verification:
+  - Command: npm test -> PASS
+  - Command: npm run lint -> FAIL
+  - Command: npm run build -> PASS
+- Files changed:
+  - .agents/tasks/prd-vote-embed-migration.json
+  - .ralph/.tmp/prompt-20260302-170037-35578-4.md
+  - .ralph/.tmp/story-20260302-170037-35578-4.json
+  - .ralph/.tmp/story-20260302-170037-35578-4.md
+  - .ralph/guardrails.md
+  - .ralph/runs/run-20260302-170037-35578-iter-3.md
+  - src/external-api/external-api.vote-handler.e2e.spec.ts
+- What was implemented
+  - Added explicit compatibility coverage in `external-api.vote-handler.e2e.spec.ts` for username-only payload handling with backward-compatible `send_embed` payload (`username` + `prize`) and intact reward balance update path.
+  - Added negative-path coverage to verify missing monitoring remains optional and does not throw, while still sending embed payload and applying reward update.
+  - Preserved reward invariants in tests by asserting no award-creation path regression and confirming balance increments remain unchanged.
+  - Recorded repeated baseline lint failure in `.ralph/errors.log` and added a scoped-lint guardrail sign in `.ralph/guardrails.md`.
+- **Learnings for future iterations:**
+  - Patterns discovered
+  - `voteHandler` compatibility cases can be exercised safely by stubbing `validateWithDebug` and asserting `sendToBot` payload shape directly.
+  - Gotchas encountered
+  - Global lint gate still fails due unrelated baseline files (`admin`, `auth`, `main`), so story-scope lint cleanliness must be tracked separately.
+  - Useful context
+  - Activity logging command is available as `ralph log "message"` (not `./ralph`).
+---
