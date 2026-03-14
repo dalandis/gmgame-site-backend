@@ -43,7 +43,7 @@ export class DataProviderService {
     url: string,
     method: string,
   ): Promise<AxiosResponse> {
-    const targetUrl = this.joinUrl(process.env.URL_FOR_SERVER_API_NEW, url);
+    const targetUrl = this.joinUrl(process.env.URL_FOR_SERVER_API, url);
 
     return axios.request({
       data: JSON.stringify(payload),
