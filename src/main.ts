@@ -2,16 +2,25 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
+import { json, NextFunction, Request, Response } from 'express';
+import { AdminQueuesService } from './admin/queues/queues.service';
 const cookieSession = require('cookie-session');
-const Queue = require('bull');
-const { createBullBoard } = require('bull-board');
-const { BullAdapter } = require('bull-board/bullAdapter');
-import * as basicAuth from 'express-basic-auth';
 // const connectRedis = require('connect-redis');
 const redis = require('redis');
 const session = require('express-session');
 import RedisStore from 'connect-redis';
-import { json } from 'express';
+
+function ensureAdminBullBoardAccess(req: Request, res: Response, next: NextFunction) {
+  const isAuthenticated = typeof req.isAuthenticated === 'function' && req.isAuthenticated();
+  const user = req.user as { role?: string } | undefined;
+
+  if (isAuthenticated && user?.role === 'admin') {
+    next();
+    return;
+  }
+
+  res.status(403).send('Forbidden');
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -60,23 +69,16 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.useGlobalPipes(new ValidationPipe());
-
-  const { router, setQueues, replaceQueues, addQueue, removeQueue } = createBullBoard([
-    new BullAdapter(new Queue('users')),
-    new BullAdapter(new Queue('cron-tasks')),
-    new BullAdapter(new Queue('markers')),
-    new BullAdapter(new Queue('citizenship')),
-  ]);
-
-  const protect = basicAuth({
-    users: { [process.env.BASIC_AUTH_USERNAME]: process.env.BASIC_AUTH_PASSWORD },
-    challenge: true,
-  });
-
   app.use(json({ limit: '50mb' }));
 
-  app.use('/admin/queues', protect, router);
+  if (process.env.ENABLE_BULL_BOARD_DEBUG_UI === 'true') {
+    const adminQueuesService = app.get(AdminQueuesService);
+    app.use(
+      adminQueuesService.getDebugBullBoardPath(),
+      ensureAdminBullBoardAccess,
+      adminQueuesService.getDebugBullBoardRouter(),
+    );
+  }
 
   await app.listen(3001);
 }
