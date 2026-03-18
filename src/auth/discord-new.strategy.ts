@@ -15,7 +15,7 @@ interface IProfile extends Profile {
 const config = {
   clientID: process.env.AUTH_CLIENT_ID,
   clientSecret: process.env.AUTH_CLIENT_SECRET,
-  callbackURL: 'https://new.gmgame.ru/api/callback',
+  callbackURL: 'https://gmgame.ru/api/callback',
   scope: ['identify', 'email'],
   keepSessionInfo: true,
 };

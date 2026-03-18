@@ -43,7 +43,7 @@ export class AuthController {
   @Get('/callback-new')
   discordNewAuthCallback(@Request() req, @Response() res) {
     if (req.user) {
-      return res.redirect('https://new.gmgame.ru/cab/profile');
+      return res.redirect('https://gmgame.ru/cab/profile');
     } else {
       return res.status(500).send('Authentication failed');
     }
