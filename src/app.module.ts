@@ -24,6 +24,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ShopModule } from './shop/shop.module';
+import { ShopkeepersModule } from './shopkeepers/shopkeepers.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ShopModule } from './shop/shop.module';
     AwardsModule,
     StatisticsModule,
     ShopModule,
+    ShopkeepersModule,
     AdminModule,
     ProcessQueuesModule,
     LogsModule,
