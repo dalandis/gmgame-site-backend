@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
+import axios from 'axios';
 
 export interface ShopkeeperItemComponent {
   /** Кастомное имя предмета (JSON-строка компонента Text Component) */
@@ -137,6 +139,33 @@ export interface ShopkeepersData {
 export class ShopkeepersService {
   private readonly logger = new Logger(ShopkeepersService.name);
   private readonly saveFilePath = path.resolve(process.cwd(), 'save.yml');
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async compass(discordId: string, x: number, z: number): Promise<{ ok?: string; error?: string }> {
+    const user = await this.prisma.users.findUnique({
+      where: { user_id: discordId },
+      select: { username: true },
+    });
+
+    if (!user?.username) {
+      return { error: 'Ник не найден. Убедитесь что аккаунт привязан.' };
+    }
+
+    const url = `${process.env.URL_FOR_SERVER_API}/compass_new`;
+    this.logger.log(`compass request: POST ${url} body=${JSON.stringify({ username: user.username, x, z, world: 'gmgame' })}`);
+    try {
+      const { data } = await axios.post(
+        url,
+        { username: user.username, x, z, world: 'gmgame' },
+        { headers: { Authorization: `Bearer ${process.env.TOKEN_FOR_SERVER_API}`, 'Content-Type': 'application/json' } },
+      );
+      return data as { ok?: string; error?: string };
+    } catch (err) {
+      this.logger.error(`compass error: ${err}`);
+      return { error: 'Ошибка при отправке команды на сервер' };
+    }
+  }
 
   parse(): ShopkeepersData {
     let raw: string;
