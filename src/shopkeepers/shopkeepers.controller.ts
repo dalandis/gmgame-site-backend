@@ -7,8 +7,8 @@ export class ShopkeepersController {
   constructor(private readonly shopkeepersService: ShopkeepersService) {}
 
   @Get()
-  getAll(@Response() res): void {
-    const data = this.shopkeepersService.parse();
+  async getAll(@Response() res): Promise<void> {
+    const data = await this.shopkeepersService.fetchAll();
     res.send(JSON.stringify(data));
   }
 
